@@ -243,6 +243,63 @@ body {
   flex: 1;
 }
 
+.variants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.variants-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.variant-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.variant-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem 0.2rem 0.25rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+}
+
+.variant-chip img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+}
+
+.variant-chip:hover {
+  border-color: var(--rarity-color, var(--accent));
+}
+
+.variant-chip.owned {
+  background: var(--rarity-color, var(--accent));
+  border-color: var(--rarity-color, var(--accent));
+  color: #0f1115;
+}
+
+.variant-chip.owned::after {
+  content: "✓";
+  font-weight: 800;
+}
+
 .elemental-costs {
   display: flex;
   gap: 0.75rem;

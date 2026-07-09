@@ -1,17 +1,65 @@
 // Dados dos Elementais ("Sprites") do Fortnite Battle Royale
 // (Capítulo 7, Temporada 3 + evento "Gone Wild").
-// Fonte: fortnite.fandom.com/wiki/Sprites e cobertura da comunidade (jun/2026).
+// Fonte: fortnite.fandom.com/wiki/Sprites e cobertura da comunidade (jul/2026).
 // Atualize esta lista manualmente quando novos Elementais forem lançados.
 //
 // As imagens vêm da Fortnite Wiki via Special:FilePath (redireciona para o
-// arquivo atual da wiki). Se uma imagem falhar, o app usa o ícone SVG local.
-const WIKI_FILE = (name) =>
-  `https://fortnite.fandom.com/wiki/Special:FilePath/${encodeURIComponent(name)}%20-%20Icon%20-%20Fortnite.png`;
+// arquivo atual da wiki). Os arquivos seguem o padrão
+// "{Nome} - Item - Fortnite.png" (ex.: "Water Sprite - Item - Fortnite.png",
+// "Gold Water Sprite - Item - Fortnite.png"). Se uma imagem falhar, o app
+// usa o ícone SVG local como fallback.
+const WIKI_ITEM = (fileBase) =>
+  `https://fortnite.fandom.com/wiki/Special:FilePath/${encodeURIComponent(
+    `${fileBase} - Item - Fortnite.png`
+  )}`;
+
+// Variantes padrão dos Sprites. Todos os Sprites têm as cinco variantes,
+// exceto o Burnt Peanut (Mítico), que não tem nenhuma.
+const SPRITE_VARIANTS = [
+  {
+    id: "gold",
+    name: "Gold",
+    effect: { pt: "XP bônus em eliminações", en: "Bonus XP on eliminations" },
+  },
+  {
+    id: "gummy",
+    name: "Gummy",
+    effect: {
+      pt: "Mais Sprite Dust ao extrair",
+      en: "More Sprite Dust on extraction",
+    },
+  },
+  {
+    id: "galaxy",
+    name: "Galaxy",
+    effect: { pt: "Mais munição ao saquear", en: "More ammo when looting" },
+  },
+  {
+    id: "gem",
+    name: "Gem",
+    effect: { pt: "Reduz dano de queda", en: "Reduces fall damage" },
+  },
+  {
+    id: "holofoil",
+    name: "Holofoil",
+    effect: {
+      pt: "Chance do esquadrão achar Sprites raros",
+      en: "Chance for your squad to find rare Sprites",
+    },
+  },
+];
+
+const makeVariants = (wikiName) =>
+  SPRITE_VARIANTS.map((v) => ({
+    ...v,
+    image: WIKI_ITEM(`${v.name} ${wikiName}`),
+  }));
 
 const ELEMENTALS = [
   {
     id: "water",
     name: "Water",
+    wikiName: "Water Sprite",
     rarity: "Rare",
     ability: {
       pt: "Regenera o escudo seu e do seu esquadrão enquanto vocês estiverem na água.",
@@ -23,6 +71,7 @@ const ELEMENTALS = [
   {
     id: "earth",
     name: "Earth",
+    wikiName: "Earth Sprite",
     rarity: "Rare",
     ability: {
       pt: "Aumenta a chance de encontrar itens raros dentro de baús.",
@@ -34,6 +83,7 @@ const ELEMENTALS = [
   {
     id: "fire",
     name: "Fire",
+    wikiName: "Fire Sprite",
     rarity: "Rare",
     ability: {
       pt: "Cria uma explosão de dano extra depois de acertar o mesmo inimigo repetidas vezes.",
@@ -45,6 +95,7 @@ const ELEMENTALS = [
   {
     id: "fishy",
     name: "Fishy",
+    wikiName: "Fishy Sprite",
     rarity: "Rare",
     ability: {
       pt: "Aumenta bastante a velocidade de natação e dá um boost de velocidade ao levar dano.",
@@ -56,6 +107,7 @@ const ELEMENTALS = [
   {
     id: "duck",
     name: "Duck",
+    wikiName: "Duck Sprite",
     rarity: "Epic",
     ability: {
       pt: "Emotar ou usar o Jam recupera escudo.",
@@ -67,6 +119,7 @@ const ELEMENTALS = [
   {
     id: "ghost",
     name: "Ghost",
+    wikiName: "Ghost Sprite",
     rarity: "Epic",
     ability: {
       pt: "Concede uma breve janela furtiva sempre que você recarrega a arma.",
@@ -78,6 +131,7 @@ const ELEMENTALS = [
   {
     id: "demon",
     name: "Demon",
+    wikiName: "Demon Sprite",
     rarity: "Epic",
     ability: {
       pt: "Rouba um pouco de vida e escudo ao eliminar um oponente.",
@@ -89,6 +143,7 @@ const ELEMENTALS = [
   {
     id: "king",
     name: "King",
+    wikiName: "King Sprite",
     rarity: "Epic",
     ability: {
       pt: "Sua picareta causa mais dano.",
@@ -100,6 +155,7 @@ const ELEMENTALS = [
   {
     id: "aura",
     name: "Aura",
+    wikiName: "Aura Sprite",
     rarity: "Epic",
     ability: {
       pt: "Ganha uma carga de Shock Rock ao causar dano suficiente em inimigos.",
@@ -111,6 +167,7 @@ const ELEMENTALS = [
   {
     id: "striker",
     name: "Striker",
+    wikiName: "Striker Sprite",
     rarity: "Epic",
     ability: {
       pt: "Ganha Overdrive ao subir (Mantle) ou saltar obstáculos (Hurdle).",
@@ -122,6 +179,7 @@ const ELEMENTALS = [
   {
     id: "dream",
     name: "Dream",
+    wikiName: "Dream Sprite",
     rarity: "Legendary",
     ability: {
       pt: "Dropa loot aleatório a cada level up, culminando em itens lendários no nível máximo.",
@@ -133,6 +191,7 @@ const ELEMENTALS = [
   {
     id: "punk",
     name: "Punk",
+    wikiName: "Punk Sprite",
     rarity: "Legendary",
     ability: {
       pt: "Chance de munição infinita ou recarga automática.",
@@ -144,6 +203,7 @@ const ELEMENTALS = [
   {
     id: "boss",
     name: "Boss",
+    wikiName: "Boss Sprite",
     rarity: "Legendary",
     ability: {
       pt: "Aumenta o HP e o Shield máximos.",
@@ -155,6 +215,7 @@ const ELEMENTALS = [
   {
     id: "zero-point",
     name: "Zero Point",
+    wikiName: "Zero Point Sprite",
     rarity: "Mythic",
     ability: {
       pt: "Cria automaticamente uma Shield Bubble Jr. sempre que você se cura.",
@@ -166,7 +227,9 @@ const ELEMENTALS = [
   {
     id: "burnt-peanut",
     name: "Burnt Peanut",
+    wikiName: "Burnt Peanut",
     rarity: "Mythic",
+    noVariants: true,
     ability: {
       pt: "Mais chance de encontrar loot extra ao eliminar jogadores.",
       en: "Higher chance of finding extra loot when eliminating players.",
@@ -176,7 +239,8 @@ const ELEMENTALS = [
   },
   {
     id: "grim-reaper",
-    name: "Grim Reaper",
+    name: "Grim",
+    wikiName: "Grim Sprite",
     rarity: "Mythic",
     ability: {
       pt: "Marca no seu HUD, por um tempo, qualquer inimigo que te atacar.",
@@ -186,3 +250,8 @@ const ELEMENTALS = [
     variantCost: 15000,
   },
 ];
+
+ELEMENTALS.forEach((e) => {
+  e.image = WIKI_ITEM(e.wikiName);
+  e.variants = e.noVariants ? [] : makeVariants(e.wikiName);
+});

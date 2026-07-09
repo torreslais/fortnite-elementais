@@ -17,10 +17,12 @@ const TRANSLATIONS = {
     searchPlaceholder: "Buscar Elemental pelo nome...",
     tabAll: "Todos",
     tabOwned: "Meus ★",
-    progress: (owned, total) => `${owned} / ${total} Elementais coletados`,
+    progress: (owned, total) => `${owned} / ${total} coletados (Sprites e variantes)`,
     owned: "Eu possuo",
     favorite: "Favoritar",
     variant: "(variante)",
+    variantsLabel: "Variantes",
+    noVariants: "Sem variantes",
     empty: "Nenhum Elemental encontrado.",
     footer:
       'Dados baseados na <a href="https://fortnite.fandom.com/wiki/Sprites" target="_blank" rel="noopener noreferrer">Fortnite Wiki</a> e não afiliados à Epic Games. Progresso salvo apenas neste navegador.',
@@ -34,10 +36,12 @@ const TRANSLATIONS = {
     searchPlaceholder: "Search Elementals by name...",
     tabAll: "All",
     tabOwned: "Mine ★",
-    progress: (owned, total) => `${owned} / ${total} Elementals collected`,
+    progress: (owned, total) => `${owned} / ${total} collected (Sprites and variants)`,
     owned: "I own it",
     favorite: "Favorite",
     variant: "(variant)",
+    variantsLabel: "Variants",
+    noVariants: "No variants",
     empty: "No Elementals found.",
     footer:
       'Data based on the <a href="https://fortnite.fandom.com/wiki/Sprites" target="_blank" rel="noopener noreferrer">Fortnite Wiki</a>, not affiliated with Epic Games. Progress is saved in this browser only.',
@@ -99,7 +103,9 @@ function t() {
 }
 
 function getEntry(id) {
-  return collection[id] || { owned: false, favorite: false };
+  const entry = collection[id] || { owned: false, favorite: false };
+  if (!entry.variants) entry.variants = {};
+  return entry;
 }
 
 function setEntry(id, patch) {
@@ -141,8 +147,14 @@ function applyLanguage() {
 }
 
 function renderProgress() {
-  const total = ELEMENTALS.length;
-  const owned = ELEMENTALS.filter((e) => getEntry(e.id).owned).length;
+  let total = 0;
+  let owned = 0;
+  ELEMENTALS.forEach((e) => {
+    const entry = getEntry(e.id);
+    total += 1 + e.variants.length;
+    if (entry.owned) owned += 1;
+    owned += e.variants.filter((v) => entry.variants[v.id]).length;
+  });
   const pct = total === 0 ? 0 : Math.round((owned / total) * 100);
   progressFill.style.width = `${pct}%`;
   progressLabel.textContent = t().progress(owned, total);
@@ -155,6 +167,40 @@ function iconFallback(img, id) {
 }
 window.iconFallback = iconFallback;
 
+// Fallback das variantes: se a imagem da wiki falhar, o chip fica só com o nome.
+function variantImgFallback(img) {
+  img.remove();
+}
+window.variantImgFallback = variantImgFallback;
+
+function variantChips(elemental, entry, s) {
+  if (!elemental.variants.length) {
+    return `<div class="variants"><span class="variants-label">${s.noVariants}</span></div>`;
+  }
+
+  const chips = elemental.variants
+    .map((v) => {
+      const ownedVariant = Boolean(entry.variants[v.id]);
+      return `
+        <button type="button"
+                class="variant-chip${ownedVariant ? " owned" : ""}"
+                data-action="variant" data-id="${elemental.id}" data-variant="${v.id}"
+                title="${v.name} — ${v.effect[lang]}"
+                aria-pressed="${ownedVariant}">
+          <img src="${v.image}" alt="" loading="lazy"
+               onerror="variantImgFallback(this)" />
+          <span>${v.name}</span>
+        </button>`;
+    })
+    .join("");
+
+  return `
+    <div class="variants">
+      <span class="variants-label">${s.variantsLabel}</span>
+      <div class="variant-chips">${chips}</div>
+    </div>`;
+}
+
 function createCard(elemental) {
   const s = t();
   const entry = getEntry(elemental.id);
@@ -162,12 +208,10 @@ function createCard(elemental) {
   card.className = "elemental-card" + (entry.owned ? " owned" : "");
   card.style.setProperty("--rarity-color", RARITY_COLORS[elemental.rarity]);
 
-  const imgUrl = elemental.image || WIKI_FILE(`${elemental.name} Sprite`);
-
   card.innerHTML = `
     <div class="card-head">
       <div class="elemental-icon">
-        <img src="${imgUrl}" alt="${elemental.name}" loading="lazy"
+        <img src="${elemental.image}" alt="${elemental.name}" loading="lazy"
              onerror="iconFallback(this, '${elemental.id}')" />
       </div>
       <div class="card-title">
@@ -176,6 +220,7 @@ function createCard(elemental) {
       </div>
     </div>
     <p class="elemental-ability">${elemental.ability[lang]}</p>
+    ${variantChips(elemental, entry, s)}
     <div class="elemental-costs">
       <span>💠 ${elemental.dust} Dust</span>
       <span>🪙 ${elemental.variantCost} ${s.variant}</span>
@@ -216,6 +261,12 @@ grid.addEventListener("click", (e) => {
     render();
   } else if (action === "favorite") {
     setEntry(id, { favorite: !getEntry(id).favorite });
+    render();
+  } else if (action === "variant") {
+    const variantId = target.dataset.variant;
+    const variants = { ...getEntry(id).variants };
+    variants[variantId] = !variants[variantId];
+    setEntry(id, { variants });
     render();
   }
 });
