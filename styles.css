@@ -257,51 +257,92 @@ body {
   color: var(--muted);
 }
 
-.variant-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+.sprite-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
 }
 
-.variant-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.2rem 0.5rem 0.2rem 0.25rem;
-  border-radius: 999px;
+.sprite-tile {
   border: 1px solid var(--border);
+  border-radius: 0.55rem;
   background: var(--surface-hover);
-  color: var(--muted);
-  font-size: 0.72rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+  padding: 0.4rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
 }
 
-.variant-chip img {
-  width: 22px;
-  height: 22px;
+/* O quadradinho do Sprite base ocupa a linha inteira, acima das variantes. */
+.sprite-tile.base {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-color: var(--rarity-color, var(--border));
+}
+
+.sprite-tile.owned {
+  border-color: var(--rarity-color, var(--accent));
+  background: color-mix(in srgb, var(--rarity-color, var(--accent)) 12%, var(--surface-hover));
+}
+
+.sprite-tile.mastered {
+  box-shadow: inset 0 0 0 1px var(--rarity-color, var(--accent));
+}
+
+.tile-head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.tile-head img {
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   display: block;
+  flex-shrink: 0;
 }
 
-.variant-chip:hover {
-  border-color: var(--rarity-color, var(--accent));
+.tile-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.variant-chip.owned {
-  background: var(--rarity-color, var(--accent));
-  border-color: var(--rarity-color, var(--accent));
-  color: #0f1115;
+.tile-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
-.variant-chip.owned::after {
-  content: "✓";
-  font-weight: 800;
+.sprite-tile.base .tile-checks {
+  flex-direction: row;
+  gap: 0.75rem;
 }
 
-.variant-chip.base {
-  border-color: var(--rarity-color, var(--border));
+.tile-check {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.tile-check input {
+  width: 0.85rem;
+  height: 0.85rem;
+  margin: 0;
+  accent-color: var(--rarity-color, var(--accent));
+  cursor: pointer;
 }
 
 .elemental-costs {

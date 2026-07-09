@@ -17,8 +17,10 @@ const TRANSLATIONS = {
     searchPlaceholder: "Buscar Elemental pelo nome...",
     tabAll: "Todos",
     tabOwned: "Meus ★",
-    progress: (owned, total) => `${owned} / ${total} coletados (Sprites e variantes)`,
-    owned: "Eu possuo",
+    progress: (owned, total, mastered) =>
+      `${owned} / ${total} coletados · ${mastered} dominados`,
+    owned: "Possui",
+    mastered: "Dominado",
     favorite: "Favoritar",
     variant: "(variante)",
     dust: "Pó de Elemental",
@@ -45,8 +47,10 @@ const TRANSLATIONS = {
     searchPlaceholder: "Search Elementals by name...",
     tabAll: "All",
     tabOwned: "Mine ★",
-    progress: (owned, total) => `${owned} / ${total} collected (Sprites and variants)`,
-    owned: "I own it",
+    progress: (owned, total, mastered) =>
+      `${owned} / ${total} collected · ${mastered} mastered`,
+    owned: "Owned",
+    mastered: "Mastered",
     favorite: "Favorite",
     variant: "(variant)",
     dust: "Sprite Dust",
@@ -121,9 +125,24 @@ function t() {
 }
 
 function getEntry(id) {
-  const entry = collection[id] || { owned: false, favorite: false };
+  const entry = collection[id] || {
+    owned: false,
+    mastered: false,
+    favorite: false,
+  };
+  if (!("mastered" in entry)) entry.mastered = false;
   if (!entry.variants) entry.variants = {};
+  // Migração do formato antigo, em que a variante era só um boolean.
+  Object.keys(entry.variants).forEach((key) => {
+    if (typeof entry.variants[key] === "boolean") {
+      entry.variants[key] = { owned: entry.variants[key], mastered: false };
+    }
+  });
   return entry;
+}
+
+function getVariantEntry(entry, variantId) {
+  return entry.variants[variantId] || { owned: false, mastered: false };
 }
 
 function setEntry(id, patch) {
@@ -233,15 +252,21 @@ if ("serviceWorker" in navigator) {
 function renderProgress() {
   let total = 0;
   let owned = 0;
+  let mastered = 0;
   ELEMENTALS.forEach((e) => {
     const entry = getEntry(e.id);
     total += 1 + e.variants.length;
     if (entry.owned) owned += 1;
-    owned += e.variants.filter((v) => entry.variants[v.id]).length;
+    if (entry.mastered) mastered += 1;
+    e.variants.forEach((v) => {
+      const state = getVariantEntry(entry, v.id);
+      if (state.owned) owned += 1;
+      if (state.mastered) mastered += 1;
+    });
   });
   const pct = total === 0 ? 0 : Math.round((owned / total) * 100);
   progressFill.style.width = `${pct}%`;
-  progressLabel.textContent = t().progress(owned, total);
+  progressLabel.textContent = t().progress(owned, total, mastered);
 }
 
 // Fallback: se a imagem da wiki não carregar, mostra o ícone SVG local.
@@ -257,39 +282,57 @@ function variantImgFallback(img) {
 }
 window.variantImgFallback = variantImgFallback;
 
-function variantChips(elemental, entry, s) {
-  // O Sprite base é um chip na mesma linha das variantes.
-  const baseChip = `
-    <button type="button"
-            class="variant-chip base${entry.owned ? " owned" : ""}"
-            data-action="base" data-id="${elemental.id}"
-            title="${s.baseVariant} — ${s.owned}"
-            aria-pressed="${entry.owned}">
-      <img src="${elemental.image}" alt="" loading="lazy"
-           onerror="variantImgFallback(this)" />
-      <span>${s.baseVariant}</span>
-    </button>`;
+function spriteTile(elemental, s, { variantId, name, image, title, state, isBase }) {
+  const checkbox = (action, checked, label) => `
+    <label class="tile-check">
+      <input type="checkbox" ${checked ? "checked" : ""}
+             data-action="${action}" data-id="${elemental.id}"
+             data-variant="${variantId}" />
+      ${label}
+    </label>`;
 
-  const chips = elemental.variants
-    .map((v) => {
-      const ownedVariant = Boolean(entry.variants[v.id]);
-      return `
-        <button type="button"
-                class="variant-chip${ownedVariant ? " owned" : ""}"
-                data-action="variant" data-id="${elemental.id}" data-variant="${v.id}"
-                title="${v.name[lang]} — ${v.effect[lang]}"
-                aria-pressed="${ownedVariant}">
-          <img src="${v.image}" alt="" loading="lazy"
-               onerror="variantImgFallback(this)" />
-          <span>${v.name[lang]}</span>
-        </button>`;
-    })
+  return `
+    <div class="sprite-tile${isBase ? " base" : ""}${state.owned ? " owned" : ""}${state.mastered ? " mastered" : ""}"
+         title="${title}">
+      <div class="tile-head">
+        <img src="${image}" alt="" loading="lazy" onerror="variantImgFallback(this)" />
+        <span class="tile-name">${name}</span>
+      </div>
+      <div class="tile-checks">
+        ${checkbox("own", state.owned, s.owned)}
+        ${checkbox("master", state.mastered, s.mastered)}
+      </div>
+    </div>`;
+}
+
+function collectionTiles(elemental, entry, s) {
+  // Quadradinho do Sprite base em cima, um para cada variante abaixo.
+  const baseTile = spriteTile(elemental, s, {
+    variantId: "base",
+    name: s.baseVariant,
+    image: elemental.image,
+    title: `${elemental.name[lang]} — ${s.baseVariant}`,
+    state: entry,
+    isBase: true,
+  });
+
+  const variantTiles = elemental.variants
+    .map((v) =>
+      spriteTile(elemental, s, {
+        variantId: v.id,
+        name: v.name[lang],
+        image: v.image,
+        title: `${v.name[lang]} — ${v.effect[lang]}`,
+        state: getVariantEntry(entry, v.id),
+        isBase: false,
+      })
+    )
     .join("");
 
   return `
     <div class="variants">
       <span class="variants-label">${s.collectionLabel}</span>
-      <div class="variant-chips">${baseChip}${chips}</div>
+      <div class="sprite-tiles">${baseTile}${variantTiles}</div>
     </div>`;
 }
 
@@ -312,7 +355,7 @@ function createCard(elemental) {
       </div>
     </div>
     <p class="elemental-ability">${elemental.ability[lang]}</p>
-    ${variantChips(elemental, entry, s)}
+    ${collectionTiles(elemental, entry, s)}
     <div class="elemental-costs">
       <span>💠 ${elemental.dust} ${s.dust}</span>
       <span>🪙 ${elemental.variantCost} ${s.variant}</span>
@@ -342,17 +385,29 @@ grid.addEventListener("click", (e) => {
   const id = target.dataset.id;
   const action = target.dataset.action;
 
-  if (action === "base") {
-    setEntry(id, { owned: !getEntry(id).owned });
+  if (action === "own" || action === "master") {
+    const variantId = target.dataset.variant;
+    const checked = target.checked;
+    const entry = getEntry(id);
+
+    // "Dominado" marcado implica "Possui"; desmarcar "Possui" limpa "Dominado".
+    const apply = (state) => {
+      if (action === "master") {
+        return { owned: checked ? true : state.owned, mastered: checked };
+      }
+      return { owned: checked, mastered: checked ? state.mastered : false };
+    };
+
+    if (variantId === "base") {
+      setEntry(id, apply(entry));
+    } else {
+      const variants = { ...entry.variants };
+      variants[variantId] = apply(getVariantEntry(entry, variantId));
+      setEntry(id, { variants });
+    }
     render();
   } else if (action === "favorite") {
     setEntry(id, { favorite: !getEntry(id).favorite });
-    render();
-  } else if (action === "variant") {
-    const variantId = target.dataset.variant;
-    const variants = { ...getEntry(id).variants };
-    variants[variantId] = !variants[variantId];
-    setEntry(id, { variants });
     render();
   }
 });
