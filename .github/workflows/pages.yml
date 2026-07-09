@@ -19,12 +19,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       # Baixa o ícone oficial de Sprites da Fortnite Wiki e gera os ícones
-      # do app (roda uma única vez; o arquivo .icon-from-wiki marca que já
-      # foi feito). O runner tem acesso à internet, diferente do ambiente
+      # do app (roda uma única vez; o arquivo .icon-from-wiki-v2 marca que
+      # já foi feito). O runner tem acesso à internet, diferente do ambiente
       # de desenvolvimento, que fica atrás de um proxy restrito.
+      # O glifo da wiki é branco com transparência, então os ícones ganham
+      # o fundo escuro do tema para não sumirem em telas claras.
       - name: Download official Sprites icon (one-time)
         run: |
-          if [ ! -f .icon-from-wiki ]; then
+          if [ ! -f .icon-from-wiki-v2 ]; then
             # O WAF da Fandom bloqueia fortnite.fandom.com a partir de IPs de
             # datacenter, então baixamos direto do CDN de imagens (o caminho
             # 7/7d é o hash MD5 do nome do arquivo), com um proxy de imagens
@@ -35,18 +37,18 @@ jobs:
               curl -fsSL -o icon-orig.png \
                 "https://images.weserv.nl/?url=$(python3 -c 'import urllib.parse;print(urllib.parse.quote("static.wikia.nocookie.net/fortnite/images/7/7d/Sprites_(Vector)_-_Icon_-_Fortnite.png/revision/latest",safe=""))')&output=png"
             sudo apt-get install -y imagemagick >/dev/null 2>&1 || true
-            convert icon-orig.png -resize 512x512 -background none \
-              -gravity center -extent 512x512 icon-512.png
-            convert icon-orig.png -resize 192x192 -background none \
-              -gravity center -extent 192x192 icon-192.png
+            convert icon-orig.png -resize 400x400 -background "#0f1115" \
+              -gravity center -extent 512x512 -flatten icon-512.png
             convert icon-orig.png -resize 150x150 -background "#0f1115" \
+              -gravity center -extent 192x192 -flatten icon-192.png
+            convert icon-orig.png -resize 140x140 -background "#0f1115" \
               -gravity center -extent 180x180 -flatten icon-apple.png
-            rm icon-orig.png
-            touch .icon-from-wiki
+            rm -f icon-orig.png .icon-from-wiki
+            touch .icon-from-wiki-v2
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add icon-512.png icon-192.png icon-apple.png .icon-from-wiki
-            git commit -m "Use the official Sprites icon from the wiki as the app icon"
+            git add -A icon-512.png icon-192.png icon-apple.png .icon-from-wiki .icon-from-wiki-v2
+            git commit -m "Regenerate app icons with the theme background"
             git push origin HEAD:main
           fi
       # O environment github-pages deste repositório só aceita deploys da
