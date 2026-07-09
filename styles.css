@@ -379,7 +379,6 @@ body {
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.35;
-  flex: 1;
 }
 
 .variants {
@@ -479,6 +478,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  /* Empurra os custos para o rodapé do card; a coleção fica alinhada
+     ao topo mesmo quando o card estica (ex.: só o quadradinho Base). */
+  margin-top: auto;
 }
 
 .elemental-costs {

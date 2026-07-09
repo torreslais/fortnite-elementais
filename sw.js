@@ -6,7 +6,7 @@
 // - Imagens da wiki: cache-first, guardadas na primeira visualização.
 //
 // Aumente VERSION ao mudar a lista de arquivos do shell.
-const VERSION = "v15";
+const VERSION = "v16";
 const SHELL_CACHE = `elementais-shell-${VERSION}`;
 const IMAGE_CACHE = "elementais-images-v1";
 
