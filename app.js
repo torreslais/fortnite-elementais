@@ -25,6 +25,14 @@ const TRANSLATIONS = {
     variantsLabel: "Variantes",
     noVariants: "Sem variantes",
     empty: "Nenhum Elemental encontrado.",
+    installTitle: "📱 Instale como aplicativo",
+    installButton: "Instalar aplicativo",
+    installGeneric:
+      "Este site funciona como aplicativo: no menu do navegador (⋮), toque em “Instalar aplicativo” ou “Adicionar à tela inicial”.",
+    installIos:
+      "No iPhone/iPad: toque no botão Compartilhar (□↑) do Safari e escolha “Adicionar à Tela de Início”.",
+    installOffline:
+      "Depois de instalado, o app abre offline: seu progresso e os ícones já vistos ficam salvos no aparelho.",
     footer:
       'Dados baseados na <a href="https://fortnite.fandom.com/wiki/Sprites" target="_blank" rel="noopener noreferrer">Fortnite Wiki</a> e não afiliados à Epic Games. Progresso salvo apenas neste navegador.',
     rarities: { Rare: "Raro", Epic: "Épico", Legendary: "Lendário", Mythic: "Mítico" },
@@ -45,6 +53,14 @@ const TRANSLATIONS = {
     variantsLabel: "Variants",
     noVariants: "No variants",
     empty: "No Elementals found.",
+    installTitle: "📱 Install as an app",
+    installButton: "Install app",
+    installGeneric:
+      "This site works as an app: open the browser menu (⋮) and tap “Install app” or “Add to Home screen”.",
+    installIos:
+      "On iPhone/iPad: tap Safari's Share button (□↑) and choose “Add to Home Screen”.",
+    installOffline:
+      "Once installed, the app opens offline: your progress and previously viewed icons stay saved on your device.",
     footer:
       'Data based on the <a href="https://fortnite.fandom.com/wiki/Sprites" target="_blank" rel="noopener noreferrer">Fortnite Wiki</a>, not affiliated with Epic Games. Progress is saved in this browser only.',
     rarities: { Rare: "Rare", Epic: "Epic", Legendary: "Legendary", Mythic: "Mythic" },
@@ -150,6 +166,68 @@ function applyLanguage() {
   [...langSwitch.children].forEach((btn) =>
     btn.classList.toggle("active", btn.dataset.lang === lang)
   );
+
+  renderInstallBox();
+}
+
+// ---- Instalação como aplicativo (PWA) ----
+const installBox = document.getElementById("install-box");
+const installBtn = document.getElementById("install-btn");
+let deferredInstallPrompt = null;
+
+const isStandalone = () =>
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+
+const isIos = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+function renderInstallBox() {
+  const s = t();
+  if (isStandalone()) {
+    // Já está rodando como app instalado — sem necessidade de orientação.
+    installBox.hidden = true;
+    return;
+  }
+  installBox.hidden = false;
+  document.getElementById("install-title").textContent = s.installTitle;
+  document.getElementById("install-text").textContent = deferredInstallPrompt
+    ? ""
+    : isIos()
+      ? s.installIos
+      : s.installGeneric;
+  document.getElementById("install-offline").textContent = s.installOffline;
+  installBtn.hidden = !deferredInstallPrompt;
+  installBtn.textContent = s.installButton;
+}
+
+window.addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  renderInstallBox();
+});
+
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  installBox.hidden = true;
+});
+
+installBtn.addEventListener("click", async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  renderInstallBox();
+});
+
+// Service worker: cache do app e das imagens já vistas, para uso offline.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(() => {
+      /* offline/cache indisponível — o site continua funcionando online */
+    });
+  });
 }
 
 function renderProgress() {

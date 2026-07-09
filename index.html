@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1115" />
   <title>Fortnite — Painel de Elementais</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Elementais" />
 </head>
 <body>
   <header class="topbar">
@@ -45,6 +52,13 @@
     <section id="elemental-grid" class="elemental-grid"></section>
 
     <p id="empty-state" class="empty-state" hidden></p>
+
+    <section class="install-box" id="install-box" hidden>
+      <h2 id="install-title"></h2>
+      <p id="install-text"></p>
+      <button class="install-btn" id="install-btn" hidden></button>
+      <p class="install-offline" id="install-offline"></p>
+    </section>
   </main>
 
   <footer class="footer">

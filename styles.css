@@ -344,6 +344,46 @@ body {
   color: var(--legendary);
 }
 
+.install-box {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  border: 1px dashed var(--border);
+  border-radius: 0.9rem;
+  background: var(--surface);
+}
+
+.install-box h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.install-box p {
+  margin: 0.3rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.install-btn {
+  margin: 0.5rem 0 0.2rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.6rem;
+  border: none;
+  background: var(--accent);
+  color: #0f1115;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.install-btn:hover {
+  filter: brightness(1.08);
+}
+
+.install-offline {
+  font-size: 0.8rem;
+}
+
 .empty-state {
   text-align: center;
   color: var(--muted);
