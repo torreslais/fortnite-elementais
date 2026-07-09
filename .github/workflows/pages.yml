@@ -25,11 +25,15 @@ jobs:
       - name: Download official Sprites icon (one-time)
         run: |
           if [ ! -f .icon-from-wiki ]; then
-            # A Fandom devolve 403 para o User-Agent padrão do curl.
-            curl -fsSL -o icon-orig.png \
-              -A "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0" \
-              -H "Accept: image/png,image/*;q=0.8,*/*;q=0.5" \
-              "https://fortnite.fandom.com/wiki/Special:FilePath/Sprites_(Vector)_-_Icon_-_Fortnite.png"
+            # O WAF da Fandom bloqueia fortnite.fandom.com a partir de IPs de
+            # datacenter, então baixamos direto do CDN de imagens (o caminho
+            # 7/7d é o hash MD5 do nome do arquivo), com um proxy de imagens
+            # como fallback.
+            UA="Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"
+            CDN="https://static.wikia.nocookie.net/fortnite/images/7/7d/Sprites_(Vector)_-_Icon_-_Fortnite.png/revision/latest"
+            curl -fsSL -A "$UA" -o icon-orig.png "$CDN" ||
+              curl -fsSL -o icon-orig.png \
+                "https://images.weserv.nl/?url=$(python3 -c 'import urllib.parse;print(urllib.parse.quote("static.wikia.nocookie.net/fortnite/images/7/7d/Sprites_(Vector)_-_Icon_-_Fortnite.png/revision/latest",safe=""))')&output=png"
             sudo apt-get install -y imagemagick >/dev/null 2>&1 || true
             convert icon-orig.png -resize 512x512 -background none \
               -gravity center -extent 512x512 icon-512.png
