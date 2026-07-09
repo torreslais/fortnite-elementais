@@ -295,7 +295,8 @@ function spriteTile(elemental, s, { variantId, name, image, title, state, isBase
     <div class="sprite-tile${isBase ? " base" : ""}${state.owned ? " owned" : ""}${state.mastered ? " mastered" : ""}"
          title="${title}">
       <div class="tile-head">
-        <img src="${image}" alt="" loading="lazy" onerror="variantImgFallback(this)" />
+        <img src="${image}" alt="" width="24" height="24" loading="lazy"
+             onerror="variantImgFallback(this)" />
         <span class="tile-name">${name}</span>
       </div>
       <div class="tile-checks">
@@ -346,8 +347,8 @@ function createCard(elemental) {
   card.innerHTML = `
     <div class="card-head">
       <div class="elemental-icon">
-        <img src="${elemental.image}" alt="${elemental.name[lang]}" loading="lazy"
-             onerror="iconFallback(this, '${elemental.id}')" />
+        <img src="${elemental.image}" alt="${elemental.name[lang]}" width="56" height="56"
+             loading="lazy" onerror="iconFallback(this, '${elemental.id}')" />
       </div>
       <div class="card-title">
         <h3 class="elemental-name">${elemental.name[lang]}</h3>

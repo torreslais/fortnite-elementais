@@ -1,11 +1,12 @@
 // Service worker do Painel de Elementais.
-// - App shell: cache-first com atualização em segundo plano
-//   (stale-while-revalidate), então o app abre offline e ainda
-//   recebe novas versões quando há internet.
+// - App shell: network-first com fallback para o cache. Buscar sempre da
+//   rede garante que HTML, CSS e JS venham da MESMA versão do deploy
+//   (cache-first por arquivo misturava versões após uma atualização);
+//   o cache continua atendendo quando estiver offline.
 // - Imagens da wiki: cache-first, guardadas na primeira visualização.
 //
 // Aumente VERSION ao mudar a lista de arquivos do shell.
-const VERSION = "v1";
+const VERSION = "v2";
 const SHELL_CACHE = `elementais-shell-${VERSION}`;
 const IMAGE_CACHE = "elementais-images-v1";
 
@@ -45,17 +46,16 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-function staleWhileRevalidate(request) {
+function networkFirst(request) {
   return caches.open(SHELL_CACHE).then((cache) =>
-    cache.match(request, { ignoreSearch: request.mode === "navigate" }).then((cached) => {
-      const refresh = fetch(request)
-        .then((response) => {
-          if (response && response.ok) cache.put(request, response.clone());
-          return response;
-        })
-        .catch(() => cached);
-      return cached || refresh;
-    })
+    fetch(request)
+      .then((response) => {
+        if (response && response.ok) cache.put(request, response.clone());
+        return response;
+      })
+      .catch(() =>
+        cache.match(request, { ignoreSearch: request.mode === "navigate" })
+      )
   );
 }
 
@@ -83,7 +83,7 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
 
   if (url.origin === self.location.origin || request.mode === "navigate") {
-    event.respondWith(staleWhileRevalidate(request));
+    event.respondWith(networkFirst(request));
     return;
   }
 
