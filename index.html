@@ -14,8 +14,20 @@
   <meta name="apple-mobile-web-app-title" content="Sprites Locker" />
 </head>
 <body>
+  <div class="install-toast" id="install-box" hidden>
+    <div class="install-toast-text">
+      <strong id="install-title"></strong>
+      <span id="install-text"></span>
+      <span class="install-offline" id="install-offline"></span>
+    </div>
+    <button class="install-btn" id="install-btn" type="button" hidden></button>
+    <button class="install-close" id="install-close" type="button" aria-label="×">×</button>
+  </div>
+
   <header class="topbar">
-    <button class="refresh-btn" id="refresh-btn" type="button">⟳</button>
+    <button class="refresh-btn" id="refresh-btn" type="button">
+      <span aria-hidden="true">⟳</span><span id="refresh-label"></span>
+    </button>
     <div class="lang-switch" id="lang-switch">
       <button class="lang-btn" data-lang="pt">PT</button>
       <button class="lang-btn" data-lang="en">EN</button>
@@ -56,13 +68,6 @@
     <section id="elemental-grid" class="elemental-grid"></section>
 
     <p id="empty-state" class="empty-state" hidden></p>
-
-    <section class="install-box" id="install-box" hidden>
-      <h2 id="install-title"></h2>
-      <p id="install-text"></p>
-      <button class="install-btn" id="install-btn" hidden></button>
-      <p class="install-offline" id="install-offline"></p>
-    </section>
   </main>
 
   <footer class="footer">

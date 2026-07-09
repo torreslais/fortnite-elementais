@@ -26,6 +26,7 @@ const TRANSLATIONS = {
     mastered: "Dominado",
     favorite: "Favoritar",
     refresh: "Atualizar",
+    close: "Fechar",
     costLabel: "Custo de invocação (Pó de Elemental)",
     costTitle:
       "Quanto de Pó de Elemental custa para invocar este Elemental numa partida",
@@ -62,6 +63,7 @@ const TRANSLATIONS = {
     mastered: "Mastered",
     favorite: "Favorite",
     refresh: "Refresh",
+    close: "Close",
     costLabel: "Summon cost (Sprite Dust)",
     costTitle: "How much Sprite Dust it costs to summon this Sprite in a match",
     costVariants: "Variants",
@@ -212,6 +214,8 @@ function applyLanguage() {
   const refreshBtn = document.getElementById("refresh-btn");
   refreshBtn.title = s.refresh;
   refreshBtn.setAttribute("aria-label", s.refresh);
+  document.getElementById("refresh-label").textContent = s.refresh;
+  document.getElementById("install-close").title = s.close;
 
   [...langSwitch.children].forEach((btn) =>
     btn.classList.toggle("active", btn.dataset.lang === lang)
@@ -221,6 +225,7 @@ function applyLanguage() {
 }
 
 // ---- Instalação como aplicativo (PWA) ----
+const INSTALL_TOAST_KEY = "install-toast-dismissed";
 const installBox = document.getElementById("install-box");
 const installBtn = document.getElementById("install-btn");
 let deferredInstallPrompt = null;
@@ -235,8 +240,8 @@ const isIos = () =>
 
 function renderInstallBox() {
   const s = t();
-  if (isStandalone()) {
-    // Já está rodando como app instalado — sem necessidade de orientação.
+  if (isStandalone() || storage.get(INSTALL_TOAST_KEY)) {
+    // Já está rodando como app instalado, ou o usuário fechou o aviso.
     installBox.hidden = true;
     return;
   }
@@ -269,6 +274,11 @@ installBtn.addEventListener("click", async () => {
   await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
   renderInstallBox();
+});
+
+document.getElementById("install-close").addEventListener("click", () => {
+  storage.set(INSTALL_TOAST_KEY, "1");
+  installBox.hidden = true;
 });
 
 // Service worker: cache do app e das imagens já vistas, para uso offline.
