@@ -389,6 +389,11 @@ body {
 }
 
 /* Toast de instalação fixado no topo da página, fechável pelo usuário. */
+/* O display:flex abaixo venceria o atributo hidden sem esta regra. */
+.install-toast[hidden] {
+  display: none !important;
+}
+
 .install-toast {
   position: fixed;
   top: 0.75rem;
