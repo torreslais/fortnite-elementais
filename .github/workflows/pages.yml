@@ -6,9 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
@@ -20,14 +18,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # O environment github-pages deste repositório só aceita deploys da
+      # branch gh-pages, então publicamos espelhando a raiz da main para a
+      # gh-pages; o GitHub Pages serve essa branch automaticamente.
+      - name: Publish repository root to gh-pages
+        run: git push --force origin HEAD:gh-pages
