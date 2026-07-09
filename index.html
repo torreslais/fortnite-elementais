@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fortnite — Painel de Elementais</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="lang-switch" id="lang-switch">
+      <button class="lang-btn" data-lang="pt">PT</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <h1 id="app-title"></h1>
+    <p class="subtitle" id="app-subtitle"></p>
+  </header>
+
+  <main class="container">
+    <section class="controls">
+      <input
+        type="search"
+        id="search-input"
+        class="search-input"
+        autocomplete="off"
+      />
+
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="filter-tab active" data-rarity="all"></button>
+        <button class="filter-tab" data-rarity="Rare"></button>
+        <button class="filter-tab" data-rarity="Epic"></button>
+        <button class="filter-tab" data-rarity="Legendary"></button>
+        <button class="filter-tab" data-rarity="Mythic"></button>
+        <button class="filter-tab" data-rarity="owned"></button>
+      </div>
+    </section>
+
+    <section class="progress">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <span id="progress-label"></span>
+    </section>
+
+    <section id="elemental-grid" class="elemental-grid"></section>
+
+    <p id="empty-state" class="empty-state" hidden></p>
+  </main>
+
+  <footer class="footer">
+    <p id="app-footer"></p>
+  </footer>
+
+  <script src="data/elementals.js"></script>
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
