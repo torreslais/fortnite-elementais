@@ -24,8 +24,10 @@ const TRANSLATIONS = {
     mastered: "Dominado",
     favorite: "Favoritar",
     refresh: "Atualizar",
-    variant: "(variante)",
-    dust: "Pó de Elemental",
+    costLabel: "Custo de invocação (Pó de Elemental)",
+    costTitle:
+      "Quanto de Pó de Elemental custa para invocar este Elemental numa partida",
+    costVariants: "Variantes",
     collectionLabel: "Coleção",
     baseVariant: "Base",
     empty: "Nenhum Elemental encontrado.",
@@ -56,8 +58,9 @@ const TRANSLATIONS = {
     mastered: "Mastered",
     favorite: "Favorite",
     refresh: "Refresh",
-    variant: "(variant)",
-    dust: "Sprite Dust",
+    costLabel: "Summon cost (Sprite Dust)",
+    costTitle: "How much Sprite Dust it costs to summon this Sprite in a match",
+    costVariants: "Variants",
     collectionLabel: "Collection",
     baseVariant: "Base",
     empty: "No Elementals found.",
@@ -126,6 +129,10 @@ const langSwitch = document.getElementById("lang-switch");
 
 function t() {
   return TRANSLATIONS[lang];
+}
+
+function fmtNumber(n) {
+  return n.toLocaleString(lang === "pt" ? "pt-BR" : "en-US");
 }
 
 function getEntry(id) {
@@ -370,9 +377,16 @@ function createCard(elemental) {
     </div>
     <p class="elemental-ability">${elemental.ability[lang]}</p>
     ${collectionTiles(elemental, entry, s)}
-    <div class="elemental-costs">
-      <span>💠 ${elemental.dust} ${s.dust}</span>
-      <span>🪙 ${elemental.variantCost} ${s.variant}</span>
+    <div class="costs-block" title="${s.costTitle}">
+      <span class="variants-label">${s.costLabel}</span>
+      <div class="elemental-costs">
+        <span>💠 ${s.baseVariant}: ${fmtNumber(elemental.dust)}</span>
+        ${
+          elemental.variants.length
+            ? `<span>🪙 ${s.costVariants}: ${fmtNumber(elemental.variantCost)}</span>`
+            : ""
+        }
+      </div>
     </div>
     <button class="favorite-btn ${entry.favorite ? "active" : ""}" data-action="favorite" data-id="${elemental.id}" title="${s.favorite}">
       ${entry.favorite ? "★" : "☆"}

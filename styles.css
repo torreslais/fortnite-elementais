@@ -352,10 +352,16 @@ body {
   cursor: pointer;
 }
 
+.costs-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .elemental-costs {
   display: flex;
   gap: 0.75rem;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--muted);
 }
 
