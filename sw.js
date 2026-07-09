@@ -6,7 +6,7 @@
 // - Imagens da wiki: cache-first, guardadas na primeira visualização.
 //
 // Aumente VERSION ao mudar a lista de arquivos do shell.
-const VERSION = "v5";
+const VERSION = "v6";
 const SHELL_CACHE = `elementais-shell-${VERSION}`;
 const IMAGE_CACHE = "elementais-images-v1";
 
@@ -20,6 +20,7 @@ const SHELL_FILES = [
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
+  "./icon-apple.png",
 ];
 
 self.addEventListener("install", (event) => {

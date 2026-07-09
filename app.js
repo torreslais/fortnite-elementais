@@ -11,13 +11,15 @@ const RARITY_COLORS = {
 const TRANSLATIONS = {
   pt: {
     htmlLang: "pt-BR",
-    docTitle: "Fortnite — Painel de Elementais",
-    title: "Painel de Elementais",
+    docTitle: "Fortnite Sprites Locker",
+    title: "Fortnite Sprites Locker",
     subtitle: "Acompanhe quais Elementais do Fortnite Battle Royale você já possui",
     searchPlaceholder: "Buscar Elemental pelo nome...",
     tabAll: "Todos",
     tabOwned: "Tenho",
+    tabNotOwned: "Não tenho",
     tabMastered: "Dominados",
+    tabNotMastered: "Não dominados",
     progress: (owned, total, mastered) =>
       `${owned} / ${total} coletados · ${mastered} dominados`,
     owned: "Tenho",
@@ -45,13 +47,15 @@ const TRANSLATIONS = {
   },
   en: {
     htmlLang: "en",
-    docTitle: "Fortnite — Elementals Dashboard",
-    title: "Elementals Dashboard",
+    docTitle: "Fortnite Sprites Locker",
+    title: "Fortnite Sprites Locker",
     subtitle: "Track which Fortnite Battle Royale Elementals you already own",
     searchPlaceholder: "Search Elementals by name...",
     tabAll: "All",
     tabOwned: "Owned",
+    tabNotOwned: "Not owned",
     tabMastered: "Mastered",
+    tabNotMastered: "Not mastered",
     progress: (owned, total, mastered) =>
       `${owned} / ${total} collected · ${mastered} mastered`,
     owned: "Owned",
@@ -170,7 +174,9 @@ function hasAny(elemental, flag) {
 function matchesFilter(elemental) {
   if (activeFilter === "all") return true;
   if (activeFilter === "owned") return hasAny(elemental, "owned");
+  if (activeFilter === "not-owned") return !hasAny(elemental, "owned");
   if (activeFilter === "mastered") return hasAny(elemental, "mastered");
+  if (activeFilter === "not-mastered") return !hasAny(elemental, "mastered");
   return elemental.rarity === activeFilter;
 }
 
@@ -197,7 +203,9 @@ function applyLanguage() {
     const key = tab.dataset.rarity;
     if (key === "all") tab.textContent = s.tabAll;
     else if (key === "owned") tab.textContent = s.tabOwned;
+    else if (key === "not-owned") tab.textContent = s.tabNotOwned;
     else if (key === "mastered") tab.textContent = s.tabMastered;
+    else if (key === "not-mastered") tab.textContent = s.tabNotMastered;
     else tab.textContent = s.rarities[key];
   });
 

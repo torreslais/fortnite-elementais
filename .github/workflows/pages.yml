@@ -18,6 +18,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      # Baixa o ícone oficial de Sprites da Fortnite Wiki e gera os ícones
+      # do app (roda uma única vez; o arquivo .icon-from-wiki marca que já
+      # foi feito). O runner tem acesso à internet, diferente do ambiente
+      # de desenvolvimento, que fica atrás de um proxy restrito.
+      - name: Download official Sprites icon (one-time)
+        run: |
+          if [ ! -f .icon-from-wiki ]; then
+            curl -fsSL -o icon-orig.png \
+              "https://fortnite.fandom.com/wiki/Special:FilePath/Sprites_(Vector)_-_Icon_-_Fortnite.png"
+            sudo apt-get install -y imagemagick >/dev/null 2>&1 || true
+            convert icon-orig.png -resize 512x512 -background none \
+              -gravity center -extent 512x512 icon-512.png
+            convert icon-orig.png -resize 192x192 -background none \
+              -gravity center -extent 192x192 icon-192.png
+            convert icon-orig.png -resize 150x150 -background "#0f1115" \
+              -gravity center -extent 180x180 -flatten icon-apple.png
+            rm icon-orig.png
+            touch .icon-from-wiki
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add icon-512.png icon-192.png icon-apple.png .icon-from-wiki
+            git commit -m "Use the official Sprites icon from the wiki as the app icon"
+            git push origin HEAD:main
+          fi
       # O environment github-pages deste repositório só aceita deploys da
       # branch gh-pages, então publicamos espelhando a raiz da main para a
       # gh-pages; o GitHub Pages serve essa branch automaticamente.
