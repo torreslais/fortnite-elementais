@@ -150,6 +150,7 @@ const progressLabelMastered = document.getElementById("progress-label-mastered")
 const searchInput = document.getElementById("search-input");
 const filterTabs = document.getElementById("filter-tabs");
 const langSwitch = document.getElementById("lang-switch");
+const spriteNav = document.getElementById("sprite-nav");
 
 function t() {
   return TRANSLATIONS[lang];
@@ -269,6 +270,7 @@ function applyLanguage() {
     btn.classList.toggle("active", btn.dataset.lang === lang)
   );
 
+  renderNav(); // os títulos dos ícones seguem o idioma
   renderInstallBox();
 }
 
@@ -391,9 +393,62 @@ function iconFallback(img, id) {
 }
 window.iconFallback = iconFallback;
 
+// Mesmo fallback para os ícones do menu de navegação rápida.
+// Sem SVG local (ex.: Elementais "Em breve"), mostra a inicial do nome.
+function navIconFallback(img, id) {
+  const holder = img.closest(".nav-icon");
+  if (!holder) return;
+  const elemental = ELEMENTALS.find((e) => e.id === id);
+  holder.innerHTML =
+    ELEMENTAL_ICONS[id] ||
+    `<span class="nav-letter">${elemental ? elemental.name[lang][0] : "?"}</span>`;
+}
+window.navIconFallback = navIconFallback;
+
+// Menu de navegação rápida: um botão com o ícone de cada Elemental base.
+function renderNav() {
+  spriteNav.innerHTML = ELEMENTALS.map(
+    (e) => `
+    <button class="nav-icon${e.upcoming ? " upcoming" : ""}" type="button"
+            data-nav="${e.id}" title="${e.name[lang]}" aria-label="${e.name[lang]}"
+            style="--rarity-color:${RARITY_COLORS[e.rarity]}">
+      <img src="${e.image}" alt="" width="32" height="32" loading="lazy"
+           onerror="navIconFallback(this, '${e.id}')" />
+    </button>`
+  ).join("");
+}
+
+spriteNav.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-nav]");
+  if (!btn) return;
+
+  const id = btn.dataset.nav;
+  let card = document.getElementById(`card-${id}`);
+  if (!card) {
+    // O card está oculto pelo filtro/busca atual — limpa tudo para navegar.
+    activeFilter = "all";
+    searchTerm = "";
+    searchInput.value = "";
+    [...filterTabs.children].forEach((el) =>
+      el.classList.toggle("active", el.dataset.rarity === "all")
+    );
+    render();
+    card = document.getElementById(`card-${id}`);
+  }
+  if (!card) return;
+
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+  // Reinicia a animação de destaque mesmo em cliques repetidos.
+  card.classList.remove("nav-flash");
+  void card.offsetWidth;
+  card.classList.add("nav-flash");
+});
+
 // Fallback das variantes: se a imagem da wiki falhar, o chip fica só com o nome.
+// Esconde sem remover: o espaço fica reservado e o layout não "pula"
+// (remover deslocaria a página durante a navegação rápida).
 function variantImgFallback(img) {
-  img.remove();
+  img.style.visibility = "hidden";
 }
 window.variantImgFallback = variantImgFallback;
 
@@ -454,6 +509,7 @@ function createCard(elemental) {
   const s = t();
   const entry = getEntry(elemental.id);
   const card = document.createElement("article");
+  card.id = `card-${elemental.id}`;
   card.className = "elemental-card" + (entry.owned ? " owned" : "");
   card.style.setProperty("--rarity-color", RARITY_COLORS[elemental.rarity]);
 

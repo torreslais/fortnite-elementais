@@ -145,6 +145,57 @@ body {
   margin-bottom: 1rem;
 }
 
+/* Menu de navegação rápida: ícones dos Elementais base; clicar rola até o card. */
+.sprite-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.sprite-nav:empty {
+  display: none;
+}
+
+.nav-icon {
+  width: 44px;
+  height: 44px;
+  padding: 5px;
+  border-radius: 0.6rem;
+  border: 1px solid var(--rarity-color, var(--border));
+  background: var(--surface);
+  cursor: pointer;
+  transition: transform 0.12s, background 0.15s, box-shadow 0.15s;
+}
+
+.nav-icon img,
+.nav-icon svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.nav-icon:hover {
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.nav-icon.upcoming {
+  opacity: 0.45;
+}
+
+.nav-icon .nav-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
 .search-input {
   width: 100%;
   padding: 0.65rem 0.9rem;
@@ -300,6 +351,23 @@ body {
   position: relative;
   border-top: 4px solid var(--rarity-color, var(--border));
   transition: transform 0.15s, box-shadow 0.15s;
+  /* O scroll do menu de navegação para logo abaixo do cabeçalho fixo. */
+  scroll-margin-top: calc(4.2rem + env(safe-area-inset-top, 0px));
+}
+
+/* Destaque temporário no card alvo da navegação rápida. */
+@keyframes nav-flash {
+  0%,
+  60% {
+    box-shadow: 0 0 0 3px var(--rarity-color, var(--accent));
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+
+.elemental-card.nav-flash {
+  animation: nav-flash 1.6s ease-out 1;
 }
 
 .elemental-card:hover {
