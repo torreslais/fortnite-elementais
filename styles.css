@@ -39,7 +39,8 @@ body {
 .topbar {
   position: relative;
   text-align: center;
-  padding: 2.5rem 1rem 1.5rem;
+  /* Espaço para os controles fixos não cobrirem o título. */
+  padding: 4rem 1rem 1.5rem;
 }
 
 .topbar h1 {
@@ -52,18 +53,26 @@ body {
   color: var(--muted);
 }
 
+/* Controles fixos: seguem visíveis durante a rolagem. */
 .lang-switch {
-  position: absolute;
-  top: 1rem;
-  right: 1.25rem;
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 60;
   display: flex;
   gap: 0.35rem;
 }
 
+.lang-btn,
 .refresh-btn {
-  position: absolute;
-  top: 1rem;
-  left: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.refresh-btn {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 60;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -396,7 +405,8 @@ body {
 
 .install-toast {
   position: fixed;
-  top: 0.75rem;
+  /* Abaixo dos controles fixos do cabeçalho. */
+  top: 3.9rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;

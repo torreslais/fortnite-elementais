@@ -230,9 +230,11 @@ const installBox = document.getElementById("install-box");
 const installBtn = document.getElementById("install-btn");
 let deferredInstallPrompt = null;
 
+// Detecta a versão instalada (app): o toast de instalação só existe na web.
 const isStandalone = () =>
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone === true;
+  ["standalone", "fullscreen", "minimal-ui", "window-controls-overlay"].some(
+    (mode) => window.matchMedia(`(display-mode: ${mode})`).matches
+  ) || window.navigator.standalone === true;
 
 const isIos = () =>
   /iphone|ipad|ipod/i.test(navigator.userAgent) ||
