@@ -18,47 +18,48 @@ const WIKI_ITEM = (fileBase) =>
 const SPRITE_VARIANTS = [
   {
     id: "gold",
-    name: "Gold",
+    name: { pt: "Dourado", en: "Gold" },
     effect: { pt: "XP bônus em eliminações", en: "Bonus XP on eliminations" },
   },
   {
     id: "gummy",
-    name: "Gummy",
+    name: { pt: "Goma", en: "Gummy" },
     effect: {
-      pt: "Mais Sprite Dust ao extrair",
+      pt: "Mais Pó de Elemental ao extrair",
       en: "More Sprite Dust on extraction",
     },
   },
   {
     id: "galaxy",
-    name: "Galaxy",
+    name: { pt: "Galáxia", en: "Galaxy" },
     effect: { pt: "Mais munição ao saquear", en: "More ammo when looting" },
   },
   {
     id: "gem",
-    name: "Gem",
+    name: { pt: "Gema", en: "Gem" },
     effect: { pt: "Reduz dano de queda", en: "Reduces fall damage" },
   },
   {
     id: "holofoil",
-    name: "Holofoil",
+    name: { pt: "Metalizado", en: "Holofoil" },
     effect: {
-      pt: "Chance do esquadrão achar Sprites raros",
-      en: "Chance for your squad to find rare Sprites",
+      pt: "Chance do esquadrão achar variantes de Elementais em baús",
+      en: "Chance for your squad to find Sprite variants in chests",
     },
   },
 ];
 
+// O nome do arquivo na wiki usa sempre o nome em inglês da variante.
 const makeVariants = (wikiName) =>
   SPRITE_VARIANTS.map((v) => ({
     ...v,
-    image: WIKI_ITEM(`${v.name} ${wikiName}`),
+    image: WIKI_ITEM(`${v.name.en} ${wikiName}`),
   }));
 
 const ELEMENTALS = [
   {
     id: "water",
-    name: "Water",
+    name: { pt: "Água", en: "Water" },
     wikiName: "Water Sprite",
     rarity: "Rare",
     ability: {
@@ -70,7 +71,7 @@ const ELEMENTALS = [
   },
   {
     id: "earth",
-    name: "Earth",
+    name: { pt: "Terra", en: "Earth" },
     wikiName: "Earth Sprite",
     rarity: "Rare",
     ability: {
@@ -82,7 +83,7 @@ const ELEMENTALS = [
   },
   {
     id: "fire",
-    name: "Fire",
+    name: { pt: "Fogo", en: "Fire" },
     wikiName: "Fire Sprite",
     rarity: "Rare",
     ability: {
@@ -94,7 +95,7 @@ const ELEMENTALS = [
   },
   {
     id: "fishy",
-    name: "Fishy",
+    name: { pt: "Peixoto", en: "Fishy" },
     wikiName: "Fishy Sprite",
     rarity: "Rare",
     ability: {
@@ -106,7 +107,7 @@ const ELEMENTALS = [
   },
   {
     id: "duck",
-    name: "Duck",
+    name: { pt: "Pato", en: "Duck" },
     wikiName: "Duck Sprite",
     rarity: "Epic",
     ability: {
@@ -118,7 +119,7 @@ const ELEMENTALS = [
   },
   {
     id: "ghost",
-    name: "Ghost",
+    name: { pt: "Fantasma", en: "Ghost" },
     wikiName: "Ghost Sprite",
     rarity: "Epic",
     ability: {
@@ -130,7 +131,7 @@ const ELEMENTALS = [
   },
   {
     id: "demon",
-    name: "Demon",
+    name: { pt: "Demônio", en: "Demon" },
     wikiName: "Demon Sprite",
     rarity: "Epic",
     ability: {
@@ -142,7 +143,7 @@ const ELEMENTALS = [
   },
   {
     id: "king",
-    name: "King",
+    name: { pt: "Rei", en: "King" },
     wikiName: "King Sprite",
     rarity: "Epic",
     ability: {
@@ -154,7 +155,7 @@ const ELEMENTALS = [
   },
   {
     id: "aura",
-    name: "Aura",
+    name: { pt: "Aura", en: "Aura" },
     wikiName: "Aura Sprite",
     rarity: "Epic",
     ability: {
@@ -166,7 +167,7 @@ const ELEMENTALS = [
   },
   {
     id: "striker",
-    name: "Striker",
+    name: { pt: "Atacante", en: "Striker" },
     wikiName: "Striker Sprite",
     rarity: "Epic",
     ability: {
@@ -178,7 +179,7 @@ const ELEMENTALS = [
   },
   {
     id: "dream",
-    name: "Dream",
+    name: { pt: "Sonhos", en: "Dream" },
     wikiName: "Dream Sprite",
     rarity: "Legendary",
     ability: {
@@ -190,7 +191,7 @@ const ELEMENTALS = [
   },
   {
     id: "punk",
-    name: "Punk",
+    name: { pt: "Punk", en: "Punk" },
     wikiName: "Punk Sprite",
     rarity: "Legendary",
     ability: {
@@ -202,7 +203,7 @@ const ELEMENTALS = [
   },
   {
     id: "boss",
-    name: "Boss",
+    name: { pt: "Chefe", en: "Boss" },
     wikiName: "Boss Sprite",
     rarity: "Legendary",
     ability: {
@@ -214,7 +215,7 @@ const ELEMENTALS = [
   },
   {
     id: "zero-point",
-    name: "Zero Point",
+    name: { pt: "Ponto Zero", en: "Zero Point" },
     wikiName: "Zero Point Sprite",
     rarity: "Mythic",
     ability: {
@@ -226,7 +227,7 @@ const ELEMENTALS = [
   },
   {
     id: "burnt-peanut",
-    name: "Burnt Peanut",
+    name: { pt: "Amendoim Queimado", en: "Burnt Peanut" },
     wikiName: "Burnt Peanut",
     rarity: "Mythic",
     noVariants: true,
@@ -239,7 +240,7 @@ const ELEMENTALS = [
   },
   {
     id: "grim-reaper",
-    name: "Grim",
+    name: { pt: "Ceifador", en: "Grim" },
     wikiName: "Grim Sprite",
     rarity: "Mythic",
     ability: {

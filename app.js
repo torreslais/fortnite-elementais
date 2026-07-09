@@ -21,6 +21,7 @@ const TRANSLATIONS = {
     owned: "Eu possuo",
     favorite: "Favoritar",
     variant: "(variante)",
+    dust: "Pó de Elemental",
     variantsLabel: "Variantes",
     noVariants: "Sem variantes",
     empty: "Nenhum Elemental encontrado.",
@@ -40,6 +41,7 @@ const TRANSLATIONS = {
     owned: "I own it",
     favorite: "Favorite",
     variant: "(variant)",
+    dust: "Sprite Dust",
     variantsLabel: "Variants",
     noVariants: "No variants",
     empty: "No Elementals found.",
@@ -121,7 +123,11 @@ function matchesFilter(elemental) {
 
 function matchesSearch(elemental) {
   if (!searchTerm) return true;
-  return elemental.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const term = searchTerm.toLowerCase();
+  return (
+    elemental.name.pt.toLowerCase().includes(term) ||
+    elemental.name.en.toLowerCase().includes(term)
+  );
 }
 
 function applyLanguage() {
@@ -185,11 +191,11 @@ function variantChips(elemental, entry, s) {
         <button type="button"
                 class="variant-chip${ownedVariant ? " owned" : ""}"
                 data-action="variant" data-id="${elemental.id}" data-variant="${v.id}"
-                title="${v.name} — ${v.effect[lang]}"
+                title="${v.name[lang]} — ${v.effect[lang]}"
                 aria-pressed="${ownedVariant}">
           <img src="${v.image}" alt="" loading="lazy"
                onerror="variantImgFallback(this)" />
-          <span>${v.name}</span>
+          <span>${v.name[lang]}</span>
         </button>`;
     })
     .join("");
@@ -211,18 +217,18 @@ function createCard(elemental) {
   card.innerHTML = `
     <div class="card-head">
       <div class="elemental-icon">
-        <img src="${elemental.image}" alt="${elemental.name}" loading="lazy"
+        <img src="${elemental.image}" alt="${elemental.name[lang]}" loading="lazy"
              onerror="iconFallback(this, '${elemental.id}')" />
       </div>
       <div class="card-title">
-        <h3 class="elemental-name">${elemental.name}</h3>
+        <h3 class="elemental-name">${elemental.name[lang]}</h3>
         <span class="rarity-badge">${s.rarities[elemental.rarity]}</span>
       </div>
     </div>
     <p class="elemental-ability">${elemental.ability[lang]}</p>
     ${variantChips(elemental, entry, s)}
     <div class="elemental-costs">
-      <span>💠 ${elemental.dust} Dust</span>
+      <span>💠 ${elemental.dust} ${s.dust}</span>
       <span>🪙 ${elemental.variantCost} ${s.variant}</span>
     </div>
     <div class="card-actions">
