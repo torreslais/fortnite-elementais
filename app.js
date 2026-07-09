@@ -16,12 +16,14 @@ const TRANSLATIONS = {
     subtitle: "Acompanhe quais Elementais do Fortnite Battle Royale você já possui",
     searchPlaceholder: "Buscar Elemental pelo nome...",
     tabAll: "Todos",
-    tabOwned: "Meus ★",
+    tabOwned: "Tenho",
+    tabMastered: "Dominados",
     progress: (owned, total, mastered) =>
       `${owned} / ${total} coletados · ${mastered} dominados`,
-    owned: "Possui",
+    owned: "Tenho",
     mastered: "Dominado",
     favorite: "Favoritar",
+    refresh: "Atualizar",
     variant: "(variante)",
     dust: "Pó de Elemental",
     collectionLabel: "Coleção",
@@ -46,12 +48,14 @@ const TRANSLATIONS = {
     subtitle: "Track which Fortnite Battle Royale Elementals you already own",
     searchPlaceholder: "Search Elementals by name...",
     tabAll: "All",
-    tabOwned: "Mine ★",
+    tabOwned: "Owned",
+    tabMastered: "Mastered",
     progress: (owned, total, mastered) =>
       `${owned} / ${total} collected · ${mastered} mastered`,
     owned: "Owned",
     mastered: "Mastered",
     favorite: "Favorite",
+    refresh: "Refresh",
     variant: "(variant)",
     dust: "Sprite Dust",
     collectionLabel: "Collection",
@@ -150,9 +154,16 @@ function setEntry(id, patch) {
   saveCollection(collection);
 }
 
+function hasAny(elemental, flag) {
+  const entry = getEntry(elemental.id);
+  if (entry[flag]) return true;
+  return elemental.variants.some((v) => getVariantEntry(entry, v.id)[flag]);
+}
+
 function matchesFilter(elemental) {
   if (activeFilter === "all") return true;
-  if (activeFilter === "owned") return getEntry(elemental.id).owned;
+  if (activeFilter === "owned") return hasAny(elemental, "owned");
+  if (activeFilter === "mastered") return hasAny(elemental, "mastered");
   return elemental.rarity === activeFilter;
 }
 
@@ -179,8 +190,13 @@ function applyLanguage() {
     const key = tab.dataset.rarity;
     if (key === "all") tab.textContent = s.tabAll;
     else if (key === "owned") tab.textContent = s.tabOwned;
+    else if (key === "mastered") tab.textContent = s.tabMastered;
     else tab.textContent = s.rarities[key];
   });
+
+  const refreshBtn = document.getElementById("refresh-btn");
+  refreshBtn.title = s.refresh;
+  refreshBtn.setAttribute("aria-label", s.refresh);
 
   [...langSwitch.children].forEach((btn) =>
     btn.classList.toggle("active", btn.dataset.lang === lang)
@@ -294,11 +310,9 @@ function spriteTile(elemental, s, { variantId, name, image, title, state }) {
   return `
     <div class="sprite-tile${state.owned ? " owned" : ""}${state.mastered ? " mastered" : ""}"
          title="${title}">
-      <div class="tile-head">
-        <img src="${image}" alt="" width="24" height="24" loading="lazy"
-             onerror="variantImgFallback(this)" />
-        <span class="tile-name">${name}</span>
-      </div>
+      <img class="tile-img" src="${image}" alt="" width="36" height="36"
+           loading="lazy" onerror="variantImgFallback(this)" />
+      <span class="tile-name">${name}</span>
       <div class="tile-checks">
         ${checkbox("own", state.owned, s.owned)}
         ${checkbox("master", state.mastered, s.mastered)}
@@ -424,6 +438,10 @@ filterTabs.addEventListener("click", (e) => {
   activeFilter = btn.dataset.rarity;
   [...filterTabs.children].forEach((el) => el.classList.toggle("active", el === btn));
   render();
+});
+
+document.getElementById("refresh-btn").addEventListener("click", () => {
+  window.location.reload();
 });
 
 langSwitch.addEventListener("click", (e) => {
