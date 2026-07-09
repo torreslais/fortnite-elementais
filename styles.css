@@ -173,31 +173,39 @@ body {
 
 .progress {
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 1.25rem 0;
+}
+
+.progress-row {
+  display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 1.25rem 0;
 }
 
 .progress-bar {
   flex: 1;
-  height: 0.55rem;
+  height: 0.6rem;
   border-radius: 999px;
   background: var(--surface);
   border: 1px solid var(--border);
   overflow: hidden;
+  display: flex;
 }
 
-.progress-fill {
+/* Fatias coloridas pela raridade (Raro → Mítico). */
+.progress-seg {
   height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--rare), var(--mythic));
   transition: width 0.25s ease;
 }
 
-#progress-label {
+.progress-label {
   white-space: nowrap;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  min-width: 9.5rem;
+  text-align: right;
 }
 
 .elemental-grid {
@@ -492,4 +500,69 @@ body {
 
 .footer a {
   color: var(--accent);
+}
+
+/* ---- Responsividade ---- */
+
+/* Monitores largos: aproveita o espaço com mais colunas. */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1200px;
+  }
+}
+
+/* Celulares estreitos: tipografia e espaçamentos mais compactos,
+   mantendo as áreas de toque grandes. */
+@media (max-width: 480px) {
+  .topbar h1 {
+    font-size: 1.45rem;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+  }
+
+  .container {
+    padding: 0 0.75rem 2.5rem;
+  }
+
+  .elemental-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .elemental-card {
+    padding: 0.85rem;
+  }
+
+  .filter-tab {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .progress-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.25rem;
+  }
+
+  .progress-label {
+    text-align: left;
+    min-width: 0;
+  }
+}
+
+/* Telas muito estreitas: os checkboxes podem quebrar a linha no tile. */
+@media (max-width: 340px) {
+  .sprite-tile {
+    flex-wrap: wrap;
+  }
+
+  .tile-checks {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .refresh-btn span:not([aria-hidden]) {
+    display: none;
+  }
 }

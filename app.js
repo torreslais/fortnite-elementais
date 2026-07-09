@@ -20,8 +20,8 @@ const TRANSLATIONS = {
     tabNotOwned: "Não tenho",
     tabMastered: "Dominados",
     tabNotMastered: "Não dominados",
-    progress: (owned, total, mastered) =>
-      `${owned} / ${total} coletados · ${mastered} dominados`,
+    progressOwned: (owned, total) => `${owned} / ${total} coletados`,
+    progressMastered: (mastered, total) => `${mastered} / ${total} dominados`,
     owned: "Tenho",
     mastered: "Dominado",
     favorite: "Favoritar",
@@ -57,8 +57,8 @@ const TRANSLATIONS = {
     tabNotOwned: "Not owned",
     tabMastered: "Mastered",
     tabNotMastered: "Not mastered",
-    progress: (owned, total, mastered) =>
-      `${owned} / ${total} collected · ${mastered} mastered`,
+    progressOwned: (owned, total) => `${owned} / ${total} collected`,
+    progressMastered: (mastered, total) => `${mastered} / ${total} mastered`,
     owned: "Owned",
     mastered: "Mastered",
     favorite: "Favorite",
@@ -127,8 +127,10 @@ let searchTerm = "";
 
 const grid = document.getElementById("elemental-grid");
 const emptyState = document.getElementById("empty-state");
-const progressFill = document.getElementById("progress-fill");
-const progressLabel = document.getElementById("progress-label");
+const progressBarOwned = document.getElementById("progress-bar-owned");
+const progressBarMastered = document.getElementById("progress-bar-mastered");
+const progressLabelOwned = document.getElementById("progress-label-owned");
+const progressLabelMastered = document.getElementById("progress-label-mastered");
 const searchInput = document.getElementById("search-input");
 const filterTabs = document.getElementById("filter-tabs");
 const langSwitch = document.getElementById("lang-switch");
@@ -292,24 +294,47 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+const RARITY_ORDER = ["Rare", "Epic", "Legendary", "Mythic"];
+
+// Barra segmentada: cada raridade contribui com uma fatia na sua cor.
+function renderProgressBar(bar, byRarity, total) {
+  const s = t();
+  bar.innerHTML = RARITY_ORDER.map((rarity) => {
+    const count = byRarity[rarity] || 0;
+    const width = total === 0 ? 0 : (count / total) * 100;
+    return `<div class="progress-seg" style="width:${width}%; background:${RARITY_COLORS[rarity]}"
+                 title="${s.rarities[rarity]}: ${count}"></div>`;
+  }).join("");
+}
+
 function renderProgress() {
   let total = 0;
-  let owned = 0;
-  let mastered = 0;
+  const owned = { count: 0, byRarity: {} };
+  const mastered = { count: 0, byRarity: {} };
+
+  const tally = (bucket, rarity, flag) => {
+    if (!flag) return;
+    bucket.count += 1;
+    bucket.byRarity[rarity] = (bucket.byRarity[rarity] || 0) + 1;
+  };
+
   ELEMENTALS.forEach((e) => {
     const entry = getEntry(e.id);
     total += 1 + e.variants.length;
-    if (entry.owned) owned += 1;
-    if (entry.mastered) mastered += 1;
+    tally(owned, e.rarity, entry.owned);
+    tally(mastered, e.rarity, entry.mastered);
     e.variants.forEach((v) => {
       const state = getVariantEntry(entry, v.id);
-      if (state.owned) owned += 1;
-      if (state.mastered) mastered += 1;
+      tally(owned, e.rarity, state.owned);
+      tally(mastered, e.rarity, state.mastered);
     });
   });
-  const pct = total === 0 ? 0 : Math.round((owned / total) * 100);
-  progressFill.style.width = `${pct}%`;
-  progressLabel.textContent = t().progress(owned, total, mastered);
+
+  const s = t();
+  renderProgressBar(progressBarOwned, owned.byRarity, total);
+  renderProgressBar(progressBarMastered, mastered.byRarity, total);
+  progressLabelOwned.textContent = s.progressOwned(owned.count, total);
+  progressLabelMastered.textContent = s.progressMastered(mastered.count, total);
 }
 
 // Fallback: se a imagem da wiki não carregar, mostra o ícone SVG local.
