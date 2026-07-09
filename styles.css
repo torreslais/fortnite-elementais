@@ -210,7 +210,7 @@ body {
 
 .elemental-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
   gap: 1rem;
 }
 
@@ -309,7 +309,9 @@ body {
   gap: 0.45rem;
 }
 
-/* Ícone à esquerda, nome no meio, checkboxes à direita. */
+/* Ícone à esquerda, nome no meio, checkboxes à direita.
+   flex-wrap deixa os checkboxes caírem para a linha de baixo quando a
+   coluna é estreita, em vez de vazarem para fora do card. */
 .sprite-tile {
   border: 1px solid var(--border);
   border-radius: 0.6rem;
@@ -317,8 +319,10 @@ body {
   padding: 0.45rem 0.6rem;
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
 }
 
 .sprite-tile.owned {
@@ -355,6 +359,7 @@ body {
   align-items: center;
   gap: 0.8rem;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .tile-check {
@@ -551,17 +556,8 @@ body {
   }
 }
 
-/* Telas muito estreitas: os checkboxes podem quebrar a linha no tile. */
+/* Telas muito estreitas: o botão de atualizar vira só o ícone. */
 @media (max-width: 340px) {
-  .sprite-tile {
-    flex-wrap: wrap;
-  }
-
-  .tile-checks {
-    width: 100%;
-    justify-content: flex-end;
-  }
-
   .refresh-btn span:not([aria-hidden]) {
     display: none;
   }
