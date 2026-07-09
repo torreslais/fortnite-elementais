@@ -15,7 +15,7 @@ const TRANSLATIONS = {
     docTitle: "Fortnite Sprites Locker",
     title: "Fortnite Sprites Locker",
     subtitle: "Acompanhe quais Elementais do Fortnite Battle Royale você já possui",
-    searchPlaceholder: "Buscar Elemental pelo nome...",
+    backToTop: "Voltar ao topo",
     tabAll: "Todos",
     tabOwned: "Tenho",
     tabNotOwned: "Não tenho",
@@ -58,7 +58,7 @@ const TRANSLATIONS = {
     docTitle: "Fortnite Sprites Locker",
     title: "Fortnite Sprites Locker",
     subtitle: "Track which Fortnite Battle Royale Elementals you already own",
-    searchPlaceholder: "Search Elementals by name...",
+    backToTop: "Back to top",
     tabAll: "All",
     tabOwned: "Owned",
     tabNotOwned: "Not owned",
@@ -136,7 +136,6 @@ function loadLang() {
 let collection = loadCollection();
 let lang = loadLang();
 let activeFilter = "all";
-let searchTerm = "";
 let sortMode = ["default", "rarity", "alpha"].includes(storage.get(SORT_KEY))
   ? storage.get(SORT_KEY)
   : "default";
@@ -147,10 +146,10 @@ const progressBarOwned = document.getElementById("progress-bar-owned");
 const progressBarMastered = document.getElementById("progress-bar-mastered");
 const progressLabelOwned = document.getElementById("progress-label-owned");
 const progressLabelMastered = document.getElementById("progress-label-mastered");
-const searchInput = document.getElementById("search-input");
 const filterTabs = document.getElementById("filter-tabs");
 const langSwitch = document.getElementById("lang-switch");
 const spriteNav = document.getElementById("sprite-nav");
+const backToTop = document.getElementById("back-to-top");
 
 function t() {
   return TRANSLATIONS[lang];
@@ -186,19 +185,31 @@ function setEntry(id, patch) {
   saveCollection(collection);
 }
 
-function hasAny(elemental, flag) {
-  const entry = getEntry(elemental.id);
-  if (entry[flag]) return true;
-  return elemental.variants.some((v) => getVariantEntry(entry, v.id)[flag]);
+// Filtros de coleção valem por quadradinho (Base e cada variante), não só
+// pelo Sprite: retorna o teste a aplicar em cada um, ou null quando o filtro
+// ativo não é de coleção (todos os quadradinhos aparecem).
+function tileFilter() {
+  if (activeFilter === "owned") return (state) => state.owned;
+  if (activeFilter === "not-owned") return (state) => !state.owned;
+  if (activeFilter === "mastered") return (state) => state.mastered;
+  if (activeFilter === "not-mastered") return (state) => !state.mastered;
+  return null;
 }
 
 function matchesFilter(elemental) {
   if (activeFilter === "all") return true;
-  if (activeFilter === "owned") return hasAny(elemental, "owned");
-  if (activeFilter === "not-owned") return !hasAny(elemental, "owned");
-  if (activeFilter === "mastered") return hasAny(elemental, "mastered");
-  if (activeFilter === "not-mastered") return !hasAny(elemental, "mastered");
   if (activeFilter === "favorites") return getEntry(elemental.id).favorite;
+
+  // O card aparece se qualquer quadradinho dele passa no filtro de coleção.
+  const byTile = tileFilter();
+  if (byTile) {
+    const entry = getEntry(elemental.id);
+    return (
+      byTile(entry) ||
+      elemental.variants.some((v) => byTile(getVariantEntry(entry, v.id)))
+    );
+  }
+
   return elemental.rarity === activeFilter;
 }
 
@@ -218,15 +229,6 @@ function sortElementals(list) {
   return list; // ordem padrão dos dados
 }
 
-function matchesSearch(elemental) {
-  if (!searchTerm) return true;
-  const term = searchTerm.toLowerCase();
-  return (
-    elemental.name.pt.toLowerCase().includes(term) ||
-    elemental.name.en.toLowerCase().includes(term)
-  );
-}
-
 function applyLanguage() {
   const s = t();
   document.documentElement.lang = s.htmlLang;
@@ -234,8 +236,9 @@ function applyLanguage() {
   document.getElementById("app-title").textContent = s.title;
   document.getElementById("app-subtitle").textContent = s.subtitle;
   document.getElementById("app-footer").innerHTML = s.footer;
-  searchInput.placeholder = s.searchPlaceholder;
   emptyState.textContent = s.empty;
+  backToTop.title = s.backToTop;
+  backToTop.setAttribute("aria-label", s.backToTop);
 
   [...filterTabs.children].forEach((tab) => {
     const key = tab.dataset.rarity;
@@ -425,10 +428,8 @@ spriteNav.addEventListener("click", (e) => {
   const id = btn.dataset.nav;
   let card = document.getElementById(`card-${id}`);
   if (!card) {
-    // O card está oculto pelo filtro/busca atual — limpa tudo para navegar.
+    // O card está oculto pelo filtro atual — limpa o filtro para navegar.
     activeFilter = "all";
-    searchTerm = "";
-    searchInput.value = "";
     [...filterTabs.children].forEach((el) =>
       el.classList.toggle("active", el.dataset.rarity === "all")
     );
@@ -477,15 +478,23 @@ function spriteTile(elemental, s, { variantId, name, image, title, state }) {
 
 function collectionTiles(elemental, entry, s) {
   // Quadradinho do Sprite base em cima, um para cada variante abaixo.
-  const baseTile = spriteTile(elemental, s, {
-    variantId: "base",
-    name: s.baseVariant,
-    image: elemental.image,
-    title: `${elemental.name[lang]} — ${s.baseVariant}`,
-    state: entry,
-  });
+  // Com um filtro de coleção ativo, só os quadradinhos que passam no
+  // filtro aparecem (ex.: "Não tenho" lista apenas o que falta).
+  const byTile = tileFilter();
+
+  const baseTile =
+    !byTile || byTile(entry)
+      ? spriteTile(elemental, s, {
+          variantId: "base",
+          name: s.baseVariant,
+          image: elemental.image,
+          title: `${elemental.name[lang]} — ${s.baseVariant}`,
+          state: entry,
+        })
+      : "";
 
   const variantTiles = elemental.variants
+    .filter((v) => !byTile || byTile(getVariantEntry(entry, v.id)))
     .map((v) =>
       spriteTile(elemental, s, {
         variantId: v.id,
@@ -547,9 +556,7 @@ function createCard(elemental) {
 }
 
 function render() {
-  const visible = sortElementals(
-    ELEMENTALS.filter((e) => matchesFilter(e) && matchesSearch(e))
-  );
+  const visible = sortElementals(ELEMENTALS.filter((e) => matchesFilter(e)));
 
   grid.innerHTML = "";
   visible.forEach((elemental) => grid.appendChild(createCard(elemental)));
@@ -592,9 +599,17 @@ grid.addEventListener("click", (e) => {
   }
 });
 
-searchInput.addEventListener("input", (e) => {
-  searchTerm = e.target.value.trim();
-  render();
+// Botão flutuante de voltar ao topo: aparece depois de rolar um pouco.
+window.addEventListener(
+  "scroll",
+  () => {
+    backToTop.hidden = window.scrollY < 400;
+  },
+  { passive: true }
+);
+
+backToTop.addEventListener("click", () => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 filterTabs.addEventListener("click", (e) => {

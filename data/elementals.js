@@ -13,48 +13,83 @@ const WIKI_ITEM = (fileBase) =>
     `${fileBase} - Item - Fortnite.png`
   )}`;
 
-// Variantes padrão dos Sprites. Todos os Sprites têm as cinco variantes,
-// exceto o Burnt Peanut (Mítico), que não tem nenhuma.
+// Variantes padrão dos Sprites. Exceções (conforme a wiki):
+//  - Burnt Peanut (Mítico) não tem variante nenhuma (noVariants);
+//  - Dream e Punk não têm a variante Metalizado/Holofoil (noHolofoil);
+//  - Cubo existe só para Dream, Punk e Zero Point, e Quack só para o
+//    Zero Point (extraVariants).
+// Todas as variantes herdam a raridade do Sprite base — são versões
+// "especiais" com drop menor, não um tier de raridade próprio.
+// Linha do tempo: Goma habilitada em 11/jun, Galáxia em 18/jun; Gema e
+// Metalizado chegaram nas Fendas Anômalas (Sprite Hunt Rift Anomalies) e
+// foram desabilitadas em 25/jun; o Metalizado voltou em 09/jul/2026 (a
+// Gema segue desabilitada no jogo, mas continua aqui para quem já tem).
 const SPRITE_VARIANTS = [
   {
     id: "gold",
     name: { pt: "Dourado", en: "Gold" },
-    effect: { pt: "XP bônus em eliminações", en: "Bonus XP on eliminations" },
+    effect: {
+      pt: "3x XP bônus em eliminações",
+      en: "3x bonus XP on eliminations",
+    },
   },
   {
     id: "gummy",
     name: { pt: "Goma", en: "Gummy" },
     effect: {
-      pt: "Mais Pó de Elemental ao extrair",
-      en: "More Sprite Dust on extraction",
+      pt: "+20% de Pó de Elemental ao extrair",
+      en: "20% more Sprite Dust on extraction",
     },
   },
   {
     id: "galaxy",
     name: { pt: "Galáxia", en: "Galaxy" },
-    effect: { pt: "Mais munição ao saquear", en: "More ammo when looting" },
+    effect: {
+      pt: "+30% de munição ao saquear",
+      en: "30% more ammo when looting",
+    },
   },
   {
     id: "gem",
     name: { pt: "Gema", en: "Gem" },
-    effect: { pt: "Reduz dano de queda", en: "Reduces fall damage" },
+    effect: { pt: "-30% de dano de queda", en: "30% less fall damage" },
   },
   {
     id: "holofoil",
     name: { pt: "Metalizado", en: "Holofoil" },
     effect: {
-      pt: "Chance do esquadrão achar variantes de Elementais em baús",
-      en: "Chance for your squad to find Sprite variants in chests",
+      pt: "30% de chance do esquadrão achar Sprites raros em contêineres",
+      en: "30% chance for your squad to find rare Sprites from containers",
     },
   },
 ];
 
+// Variantes especiais de colecionador, exclusivas de alguns Sprites.
+// O efeito delas ainda não foi revelado (a wiki lista como "??").
+const EXTRA_VARIANTS = {
+  cube: {
+    id: "cube",
+    name: { pt: "Cubo", en: "Cube" },
+    effect: { pt: "Efeito ainda não revelado", en: "Effect not yet revealed" },
+  },
+  quack: {
+    id: "quack",
+    name: { pt: "Quack", en: "Quack" },
+    effect: { pt: "Efeito ainda não revelado", en: "Effect not yet revealed" },
+  },
+};
+
 // O nome do arquivo na wiki usa sempre o nome em inglês da variante.
-const makeVariants = (wikiName) =>
-  SPRITE_VARIANTS.map((v) => ({
+const makeVariants = (elemental) => {
+  const base = SPRITE_VARIANTS.filter(
+    (v) => !(elemental.noHolofoil && v.id === "holofoil")
+  );
+  const extras = (elemental.extraVariants || []).map((id) => EXTRA_VARIANTS[id]);
+  return [...base, ...extras].map((v) => ({
     ...v,
-    image: WIKI_ITEM(`${v.name.en} ${wikiName}`),
+    image: WIKI_ITEM(`${v.name.en} ${elemental.wikiName}`),
   }));
+};
 
 const ELEMENTALS = [
   {
@@ -182,6 +217,8 @@ const ELEMENTALS = [
     name: { pt: "Sonhos", en: "Dream" },
     wikiName: "Dream Sprite",
     rarity: "Legendary",
+    noHolofoil: true,
+    extraVariants: ["cube"],
     ability: {
       pt: "Dropa loot aleatório a cada level up, culminando em itens lendários no nível máximo.",
       en: "Drops random loot at every level up, culminating in legendary items at max level.",
@@ -194,6 +231,8 @@ const ELEMENTALS = [
     name: { pt: "Punk", en: "Punk" },
     wikiName: "Punk Sprite",
     rarity: "Legendary",
+    noHolofoil: true,
+    extraVariants: ["cube"],
     ability: {
       pt: "Chance de munição infinita ou recarga automática.",
       en: "Chance for infinite ammo or auto-reload.",
@@ -218,6 +257,7 @@ const ELEMENTALS = [
     name: { pt: "Ponto Zero", en: "Zero Point" },
     wikiName: "Zero Point Sprite",
     rarity: "Mythic",
+    extraVariants: ["cube", "quack"],
     ability: {
       pt: "Cria automaticamente uma Shield Bubble Jr. sempre que você se cura.",
       en: "Automatically deploys a Shield Bubble Jr. whenever you heal.",
@@ -296,5 +336,5 @@ const ELEMENTALS = [
 
 ELEMENTALS.forEach((e) => {
   e.image = WIKI_ITEM(e.wikiName);
-  e.variants = e.noVariants ? [] : makeVariants(e.wikiName);
+  e.variants = e.noVariants ? [] : makeVariants(e);
 });
