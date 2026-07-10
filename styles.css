@@ -312,12 +312,12 @@ body {
 }
 
 /* Botão de exportar o resumo da coleção como imagem,
-   logo abaixo das barras de progresso. */
+   logo abaixo das barras de progresso, alinhado à direita. */
 .export-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  align-self: flex-start;
+  align-self: flex-end;
   margin-top: 0.25rem;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
