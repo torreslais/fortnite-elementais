@@ -46,6 +46,10 @@ jobs:
           git commit -m "Add new Sprites from the wiki: $NEW"
           git push --force origin HEAD:auto/update-sprites
           if [ -z "$(gh pr list --head auto/update-sprites --state open --json number --jq '.[].number')" ]; then
+            # Se falhar com "not permitted to create pull requests", habilite
+            # "Allow GitHub Actions to create and approve pull requests" em
+            # Settings > Actions > General. A branch auto/update-sprites já
+            # foi enviada — dá para abrir o PR manualmente enquanto isso.
             gh pr create --base main --head auto/update-sprites \
               --title "Novos Sprites da wiki: $NEW" \
               --body "$(cat <<'EOF'
