@@ -18,6 +18,10 @@ const TRANSLATIONS = {
     backToTop: "Voltar ao topo",
     navExpand: "Mostrar todos os Elementais",
     navCollapse: "Recolher o menu",
+    exportLabel: "Exportar resumo (PNG)",
+    exportTitle: "Baixa uma imagem com o resumo da sua coleção",
+    exportFile: "sprites-resumo",
+    exportLegend: "✓ tenho · ★ dominado",
     tabAll: "Todos",
     tabOwned: "Tenho",
     tabNotOwned: "Não tenho",
@@ -63,6 +67,10 @@ const TRANSLATIONS = {
     backToTop: "Back to top",
     navExpand: "Show all Elementals",
     navCollapse: "Collapse the menu",
+    exportLabel: "Export summary (PNG)",
+    exportTitle: "Downloads an image summarizing your collection",
+    exportFile: "sprites-summary",
+    exportLegend: "✓ owned · ★ mastered",
     tabAll: "All",
     tabOwned: "Owned",
     tabNotOwned: "Not owned",
@@ -256,6 +264,10 @@ function applyLanguage() {
     else if (key === "favorites") tab.textContent = s.tabFavorites;
     else tab.textContent = s.rarities[key];
   });
+
+  const exportBtn = document.getElementById("export-btn");
+  exportBtn.title = s.exportTitle;
+  document.getElementById("export-label").textContent = s.exportLabel;
 
   document.getElementById("sort-label").textContent = s.sortLabel;
   const sortSelect = document.getElementById("sort-select");
@@ -633,6 +645,166 @@ grid.addEventListener("click", (e) => {
     render();
   }
 });
+
+// ---- Exportar resumo da coleção como PNG ----
+// Desenha tudo em canvas com formas e texto (sem imagens externas: as da
+// wiki são cross-origin e "sujariam" o canvas, impedindo o toBlob).
+// Cores fixas do tema escuro, iguais às de styles.css.
+const EXPORT_COLORS = {
+  bg: "#0f1115",
+  surface: "#1a1d24",
+  border: "#2b2f38",
+  text: "#f2f3f5",
+  muted: "#9aa1ac",
+  star: "#f2a33d",
+  rarity: {
+    Rare: "#5b9bd5",
+    Epic: "#b16fe0",
+    Legendary: "#f2a33d",
+    Mythic: "#ef5b7c",
+  },
+};
+
+function roundedRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, w, h, r);
+  } else {
+    ctx.rect(x, y, w, h);
+  }
+}
+
+function exportSummary() {
+  const s = t();
+  const c = EXPORT_COLORS;
+  const list = ELEMENTALS.filter((e) => !e.upcoming);
+
+  const W = 840;
+  const HEADER = 116;
+  const ROW = 46;
+  const FOOTER = 44;
+  const H = HEADER + list.length * ROW + FOOTER;
+
+  const canvas = document.createElement("canvas");
+  const scale = 2; // nitidez em telas retina e no zoom
+  canvas.width = W * scale;
+  canvas.height = H * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+
+  const FONT = '-apple-system, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = c.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // Cabeçalho: título, progresso e legenda.
+  let owned = 0;
+  let mastered = 0;
+  let total = 0;
+  list.forEach((e) => {
+    const entry = getEntry(e.id);
+    const states = [entry, ...e.variants.map((v) => getVariantEntry(entry, v.id))];
+    total += states.length;
+    states.forEach((st) => {
+      if (st.owned) owned += 1;
+      if (st.mastered) mastered += 1;
+    });
+  });
+
+  ctx.fillStyle = c.text;
+  ctx.font = `700 24px ${FONT}`;
+  ctx.textBaseline = "middle";
+  ctx.fillText(s.title, 24, 34);
+
+  ctx.font = `400 14px ${FONT}`;
+  ctx.fillStyle = c.muted;
+  const date = new Date().toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US");
+  ctx.fillText(
+    `${date} — ${s.progressOwned(owned, total)} · ${s.progressMastered(mastered, total)}`,
+    24,
+    62
+  );
+  ctx.fillText(s.exportLegend, 24, 84);
+
+  ctx.strokeStyle = c.border;
+  ctx.beginPath();
+  ctx.moveTo(24, HEADER - 14);
+  ctx.lineTo(W - 24, HEADER - 14);
+  ctx.stroke();
+
+  // Uma linha por Elemental: bolinha na cor da raridade com a inicial,
+  // nome e um chip por quadradinho (Base + variantes).
+  const NAME_X = 62;
+  const CHIPS_X = 218;
+  const CHIP_W = 72;
+  const CHIP_H = 26;
+  const CHIP_GAP = 4;
+
+  list.forEach((e, i) => {
+    const y = HEADER + i * ROW + ROW / 2;
+    const entry = getEntry(e.id);
+    const color = c.rarity[e.rarity];
+
+    ctx.beginPath();
+    ctx.arc(38, y, 13, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = c.bg;
+    ctx.font = `700 13px ${FONT}`;
+    ctx.textAlign = "center";
+    ctx.fillText(e.name[lang][0].toUpperCase(), 38, y + 1);
+    ctx.textAlign = "left";
+
+    ctx.fillStyle = c.text;
+    ctx.font = `700 15px ${FONT}`;
+    ctx.fillText(e.name[lang], NAME_X, y, CHIPS_X - NAME_X - 12);
+
+    const items = [
+      { label: s.baseVariant, state: entry },
+      ...e.variants.map((v) => ({
+        label: v.name[lang],
+        state: getVariantEntry(entry, v.id),
+      })),
+    ];
+
+    items.forEach((item, j) => {
+      const x = CHIPS_X + j * (CHIP_W + CHIP_GAP);
+      roundedRect(ctx, x, y - CHIP_H / 2, CHIP_W, CHIP_H, 7);
+      if (item.state.owned) {
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.fillStyle = c.bg;
+      } else {
+        ctx.fillStyle = c.surface;
+        ctx.fill();
+        ctx.strokeStyle = c.border;
+        ctx.stroke();
+        ctx.fillStyle = c.muted;
+      }
+      ctx.font = `600 11px ${FONT}`;
+      const mark = item.state.mastered ? "★ " : item.state.owned ? "✓ " : "";
+      ctx.fillText(`${mark}${item.label}`, x + 8, y + 1, CHIP_W - 14);
+    });
+  });
+
+  // Rodapé.
+  ctx.fillStyle = c.muted;
+  ctx.font = `400 12px ${FONT}`;
+  ctx.fillText("fortnite-elementais — GitHub Pages", 24, H - FOOTER / 2);
+
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${s.exportFile}-${new Date().toISOString().slice(0, 10)}.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  }, "image/png");
+}
+
+document.getElementById("export-btn").addEventListener("click", exportSummary);
 
 // Botão flutuante de voltar ao topo: aparece depois de rolar um pouco.
 window.addEventListener(
