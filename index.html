@@ -103,6 +103,18 @@
     <span aria-hidden="true">↑</span>
   </button>
 
+  <!-- Visualizador do resumo exportado: mostra a imagem gerada com opção
+       de baixar, em vez de disparar o download direto. -->
+  <div class="export-overlay" id="export-overlay" hidden>
+    <div class="export-box">
+      <img id="export-img" alt="" />
+      <div class="export-actions">
+        <a class="export-download" id="export-download"></a>
+        <button class="export-close" id="export-close" type="button"></button>
+      </div>
+    </div>
+  </div>
+
   <script src="data/elementals.js"></script>
   <script src="data/elementals-auto.js"></script>
   <script src="icons.js"></script>

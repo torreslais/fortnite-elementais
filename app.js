@@ -18,9 +18,11 @@ const TRANSLATIONS = {
     backToTop: "Voltar ao topo",
     navExpand: "Mostrar todos os Elementais",
     navCollapse: "Recolher o menu",
-    exportLabel: "Exportar resumo (PNG)",
-    exportTitle: "Baixa uma imagem com o resumo da sua coleção",
+    exportLabel: "Exportar resumo",
+    exportTitle: "Abre uma imagem com o resumo da sua coleção",
     exportFile: "sprites-resumo",
+    exportDownload: "Baixar imagem",
+    exportTotal: (total) => `${total} itens (Base + variantes)`,
     tabAll: "Todos",
     tabOwned: "Tenho",
     tabNotOwned: "Não tenho",
@@ -66,9 +68,11 @@ const TRANSLATIONS = {
     backToTop: "Back to top",
     navExpand: "Show all Elementals",
     navCollapse: "Collapse the menu",
-    exportLabel: "Export summary (PNG)",
-    exportTitle: "Downloads an image summarizing your collection",
+    exportLabel: "Export summary",
+    exportTitle: "Opens an image summarizing your collection",
     exportFile: "sprites-summary",
+    exportDownload: "Download image",
+    exportTotal: (total) => `${total} items (Base + variants)`,
     tabAll: "All",
     tabOwned: "Owned",
     tabNotOwned: "Not owned",
@@ -266,6 +270,8 @@ function applyLanguage() {
   const exportBtn = document.getElementById("export-btn");
   exportBtn.title = s.exportTitle;
   document.getElementById("export-label").textContent = s.exportLabel;
+  document.getElementById("export-download").textContent = s.exportDownload;
+  document.getElementById("export-close").textContent = s.close;
 
   document.getElementById("sort-label").textContent = s.sortLabel;
   const sortSelect = document.getElementById("sort-select");
@@ -672,13 +678,38 @@ function roundedRect(ctx, x, y, w, h, r) {
   }
 }
 
-function exportSummary() {
+// Carrega uma imagem da wiki com CORS liberado para poder desenhá-la no
+// canvas sem "sujá-lo". O ?cors=1 evita colidir com as respostas opacas já
+// guardadas pelo service worker. Resolve null se falhar ou demorar demais —
+// nesse caso a linha usa a bolinha colorida com a inicial.
+function loadCorsImage(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    let settled = false;
+    const done = (ok) => {
+      if (!settled) {
+        settled = true;
+        resolve(ok ? img : null);
+      }
+    };
+    img.onload = () => done(true);
+    img.onerror = () => done(false);
+    setTimeout(() => done(false), 5000);
+    img.src = `${url}${url.includes("?") ? "&" : "?"}cors=1`;
+  });
+}
+
+async function exportSummary() {
   const s = t();
   const c = EXPORT_COLORS;
   const list = ELEMENTALS.filter((e) => !e.upcoming);
 
+  // Ícones oficiais dos Sprites (os que falharem viram bolinha + inicial).
+  const icons = await Promise.all(list.map((e) => loadCorsImage(e.image)));
+
   const W = 840;
-  const HEADER = 140;
+  const HEADER = 196;
   const ROW = 46;
   const FOOTER = 44;
   const H = HEADER + list.length * ROW + FOOTER;
@@ -694,7 +725,8 @@ function exportSummary() {
   ctx.fillStyle = c.bg;
   ctx.fillRect(0, 0, W, H);
 
-  // Cabeçalho: título, progresso e legenda.
+  // Totais: tenho / não tenho e dominados / não dominados (de um total
+  // que conta o Base e cada variante de todos os Elementais lançados).
   let owned = 0;
   let mastered = 0;
   let total = 0;
@@ -716,21 +748,24 @@ function exportSummary() {
   const date = new Date().toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US");
   ctx.font = `400 14px ${FONT}`;
   ctx.fillStyle = c.muted;
-  ctx.fillText(date, 24, 60);
+  ctx.fillText(`${date} — ${s.exportTotal(total)}`, 24, 62);
 
-  // Totais: tenho / não tenho e dominados / não dominados (de um total
-  // que conta o Base e cada variante de todos os Elementais lançados).
-  ctx.fillStyle = c.text;
-  ctx.fillText(
-    `✓ ${s.tabOwned}: ${owned} / ${total} · ${s.tabNotOwned}: ${total - owned}`,
-    24,
-    84
-  );
-  ctx.fillText(
-    `★ ${s.tabMastered}: ${mastered} / ${total} · ${s.tabNotMastered}: ${total - mastered}`,
-    24,
-    106
-  );
+  // Números grandes, um bloco por total.
+  const stats = [
+    { value: owned, label: `✓ ${s.tabOwned}`, color: "#7dd3fc" },
+    { value: total - owned, label: s.tabNotOwned, color: c.muted },
+    { value: mastered, label: `★ ${s.tabMastered}`, color: c.star },
+    { value: total - mastered, label: s.tabNotMastered, color: c.muted },
+  ];
+  stats.forEach((stat, i) => {
+    const x = 24 + i * 200;
+    ctx.fillStyle = stat.color;
+    ctx.font = `700 42px ${FONT}`;
+    ctx.fillText(String(stat.value), x, 116);
+    ctx.fillStyle = c.muted;
+    ctx.font = `600 13px ${FONT}`;
+    ctx.fillText(stat.label, x, 150);
+  });
 
   ctx.strokeStyle = c.border;
   ctx.beginPath();
@@ -751,15 +786,19 @@ function exportSummary() {
     const entry = getEntry(e.id);
     const color = c.rarity[e.rarity];
 
-    ctx.beginPath();
-    ctx.arc(38, y, 13, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.fillStyle = c.bg;
-    ctx.font = `700 13px ${FONT}`;
-    ctx.textAlign = "center";
-    ctx.fillText(e.name[lang][0].toUpperCase(), 38, y + 1);
-    ctx.textAlign = "left";
+    if (icons[i]) {
+      ctx.drawImage(icons[i], 21, y - 17, 34, 34);
+    } else {
+      ctx.beginPath();
+      ctx.arc(38, y, 13, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.fillStyle = c.bg;
+      ctx.font = `700 13px ${FONT}`;
+      ctx.textAlign = "center";
+      ctx.fillText(e.name[lang][0].toUpperCase(), 38, y + 1);
+      ctx.textAlign = "left";
+    }
 
     ctx.fillStyle = c.text;
     ctx.font = `700 15px ${FONT}`;
@@ -798,20 +837,43 @@ function exportSummary() {
   ctx.font = `400 12px ${FONT}`;
   ctx.fillText("fortnite-elementais — GitHub Pages", 24, H - FOOTER / 2);
 
+  // Mostra a imagem num visualizador com opção de baixar,
+  // em vez de disparar o download direto.
   canvas.toBlob((blob) => {
     if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${s.exportFile}-${new Date().toISOString().slice(0, 10)}.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 10000);
+    exportUrl = URL.createObjectURL(blob);
+    exportImg.src = exportUrl;
+    exportDownloadLink.href = exportUrl;
+    exportDownloadLink.download = `${s.exportFile}-${new Date()
+      .toISOString()
+      .slice(0, 10)}.png`;
+    exportOverlay.hidden = false;
   }, "image/png");
 }
 
-document.getElementById("export-btn").addEventListener("click", exportSummary);
+const exportOverlay = document.getElementById("export-overlay");
+const exportImg = document.getElementById("export-img");
+const exportDownloadLink = document.getElementById("export-download");
+let exportUrl = null;
+
+function closeExportOverlay() {
+  exportOverlay.hidden = true;
+  exportImg.removeAttribute("src");
+  if (exportUrl) {
+    URL.revokeObjectURL(exportUrl);
+    exportUrl = null;
+  }
+}
+
+document.getElementById("export-close").addEventListener("click", closeExportOverlay);
+exportOverlay.addEventListener("click", (e) => {
+  // Clique no fundo escuro (fora da caixa) também fecha.
+  if (e.target === exportOverlay) closeExportOverlay();
+});
+
+document.getElementById("export-btn").addEventListener("click", () => {
+  exportSummary();
+});
 
 // Botão flutuante de voltar ao topo: aparece depois de rolar um pouco.
 window.addEventListener(

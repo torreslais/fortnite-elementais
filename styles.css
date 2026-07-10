@@ -334,6 +334,73 @@ body {
   background: var(--surface-hover);
 }
 
+/* Visualizador da imagem exportada. */
+.export-overlay[hidden] {
+  display: none !important;
+}
+
+.export-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.export-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+  max-width: min(680px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.export-box img {
+  display: block;
+  max-width: 100%;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 0.5rem;
+  /* A imagem é bem alta: rola dentro da caixa. */
+  object-fit: contain;
+  flex: 1;
+}
+
+.export-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.export-download {
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  background: var(--accent);
+  color: #0f1115;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.export-close {
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .sort-label {
   font-size: 0.85rem;
   color: var(--muted);
