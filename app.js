@@ -16,6 +16,8 @@ const TRANSLATIONS = {
     title: "Fortnite Sprites Locker",
     subtitle: "Acompanhe quais Elementais do Fortnite Battle Royale você já possui",
     backToTop: "Voltar ao topo",
+    navExpand: "Mostrar todos os Elementais",
+    navCollapse: "Recolher o menu",
     tabAll: "Todos",
     tabOwned: "Tenho",
     tabNotOwned: "Não tenho",
@@ -59,6 +61,8 @@ const TRANSLATIONS = {
     title: "Fortnite Sprites Locker",
     subtitle: "Track which Fortnite Battle Royale Elementals you already own",
     backToTop: "Back to top",
+    navExpand: "Show all Elementals",
+    navCollapse: "Collapse the menu",
     tabAll: "All",
     tabOwned: "Owned",
     tabNotOwned: "Not owned",
@@ -149,6 +153,8 @@ const progressLabelMastered = document.getElementById("progress-label-mastered")
 const filterTabs = document.getElementById("filter-tabs");
 const langSwitch = document.getElementById("lang-switch");
 const spriteNav = document.getElementById("sprite-nav");
+const spriteNavIcons = document.getElementById("sprite-nav-icons");
+const spriteNavToggle = document.getElementById("sprite-nav-toggle");
 const backToTop = document.getElementById("back-to-top");
 
 function t() {
@@ -274,6 +280,7 @@ function applyLanguage() {
   );
 
   renderNav(); // os títulos dos ícones seguem o idioma
+  renderNavToggle();
   renderInstallBox();
 }
 
@@ -410,7 +417,7 @@ window.navIconFallback = navIconFallback;
 
 // Menu de navegação rápida: um botão com o ícone de cada Elemental base.
 function renderNav() {
-  spriteNav.innerHTML = ELEMENTALS.map(
+  spriteNavIcons.innerHTML = ELEMENTALS.map(
     (e) => `
     <button class="nav-icon${e.upcoming ? " upcoming" : ""}" type="button"
             data-nav="${e.id}" title="${e.name[lang]}" aria-label="${e.name[lang]}"
@@ -420,6 +427,30 @@ function renderNav() {
     </button>`
   ).join("");
 }
+
+// Recolhido: uma linha rolável. Expandido: várias linhas com todos os ícones.
+const NAV_OPEN_KEY = "fortnite-elementals-nav-open";
+let navExpanded = storage.get(NAV_OPEN_KEY) === "1";
+
+function renderNavToggle() {
+  const s = t();
+  spriteNav.classList.toggle("expanded", navExpanded);
+  spriteNavToggle.textContent = navExpanded ? "▴" : "▾";
+  const label = navExpanded ? s.navCollapse : s.navExpand;
+  spriteNavToggle.title = label;
+  spriteNavToggle.setAttribute("aria-label", label);
+  spriteNavToggle.setAttribute("aria-expanded", navExpanded ? "true" : "false");
+}
+
+function setNavExpanded(value) {
+  navExpanded = value;
+  storage.set(NAV_OPEN_KEY, value ? "1" : "0");
+  renderNavToggle();
+}
+
+spriteNavToggle.addEventListener("click", () => {
+  setNavExpanded(!navExpanded);
+});
 
 spriteNav.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-nav]");
@@ -437,6 +468,10 @@ spriteNav.addEventListener("click", (e) => {
     card = document.getElementById(`card-${id}`);
   }
   if (!card) return;
+
+  // Recolhe o menu antes de rolar, para o card não parar escondido
+  // atrás da barra expandida.
+  if (navExpanded) setNavExpanded(false);
 
   card.scrollIntoView({ behavior: "smooth", block: "start" });
   // Reinicia a animação de destaque mesmo em cliques repetidos.

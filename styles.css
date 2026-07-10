@@ -147,22 +147,51 @@ body {
 
 /* Menu de navegação rápida: ícones dos Elementais base; clicar rola até o
    card. Gruda logo abaixo do cabeçalho fixo e fica acessível durante a
-   rolagem; em telas estreitas a linha rola na horizontal. */
+   rolagem. Recolhido, os ícones formam uma linha única rolável na
+   horizontal; o botão ▾ expande em várias linhas com todos visíveis. */
 .sprite-nav {
   position: sticky;
   top: calc(3.5rem + env(safe-area-inset-top, 0px));
   z-index: 50;
   display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  align-items: flex-start;
   gap: 0.4rem;
   padding: 0.55rem 0;
   background: var(--bg);
+}
+
+.sprite-nav-icons {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.4rem;
   scrollbar-width: thin;
 }
 
-.sprite-nav:empty {
-  display: none;
+.sprite-nav.expanded .sprite-nav-icons {
+  flex-wrap: wrap;
+  overflow-x: visible;
+}
+
+.sprite-nav-toggle {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.6rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sprite-nav-toggle:hover {
+  background: var(--surface-hover);
+  color: var(--text);
 }
 
 .nav-icon {

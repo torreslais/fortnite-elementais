@@ -44,8 +44,12 @@
 
   <main class="container">
     <!-- Menu de navegação rápida: um ícone por Elemental; clicar rola até o
-         card. Fica grudado abaixo do cabeçalho enquanto a página rola. -->
-    <nav class="sprite-nav" id="sprite-nav"></nav>
+         card. Fica grudado abaixo do cabeçalho enquanto a página rola.
+         Recolhido é uma linha rolável; o botão expande em várias linhas. -->
+    <nav class="sprite-nav" id="sprite-nav">
+      <div class="sprite-nav-icons" id="sprite-nav-icons"></div>
+      <button class="sprite-nav-toggle" id="sprite-nav-toggle" type="button">▾</button>
+    </nav>
 
     <section class="controls">
       <div class="filter-tabs" id="filter-tabs">
