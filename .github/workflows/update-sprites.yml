@@ -1,0 +1,71 @@
+name: Update Sprites from the wiki
+
+on:
+  schedule:
+    # Diariamente às 06:17 UTC (horário "quebrado" evita os picos do Actions).
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+  # Necessário para disparar o deploy do Pages: pushes feitos com o
+  # GITHUB_TOKEN não acionam outros workflows automaticamente.
+  actions: write
+
+concurrency:
+  group: update-sprites
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Detect new sprites on the wiki
+        run: node scripts/update-sprites.mjs
+
+      - name: Commit and push if the list changed
+        id: commit
+        run: |
+          if git diff --quiet -- data/elementals-auto.js; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Nenhuma mudança para publicar."
+          else
+            NEW=$(git diff -- data/elementals-auto.js \
+              | sed -n 's/^+.*"wikiName": "\(.*\)".*/\1/p' | paste -sd ', ' -)
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/elementals-auto.js
+            git commit -m "Add new Sprites from the wiki: $NEW"
+            git push origin HEAD:main
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger the Pages deploy
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main --repo "$GITHUB_REPOSITORY"
+
+      - name: Open a curation issue
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Traduzir novos Sprites: ${{ steps.commit.outputs.new }}" \
+            --body "$(cat <<'EOF'
+          O robô de atualização encontrou Sprites novos na [Fortnite Wiki](https://fortnite.fandom.com/wiki/Sprites) e já os publicou no app com nome em inglês e habilidade "ainda não revelada".
+
+          Para curar, mova as entradas de \`data/elementals-auto.js\` para \`data/elementals.js\` preenchendo:
+          - nome em português;
+          - texto da habilidade (PT e EN);
+          - exceções de variantes (ex.: sem Metalizado, variantes exclusivas como Cubo/Quack), se houver.
+          EOF
+          )"

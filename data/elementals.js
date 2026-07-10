@@ -1,7 +1,9 @@
 // Dados dos Elementais ("Sprites") do Fortnite Battle Royale
 // (Capítulo 7, Temporada 3 + evento "Gone Wild").
 // Fonte: fortnite.fandom.com/wiki/Sprites e cobertura da comunidade (jul/2026).
-// Atualize esta lista manualmente quando novos Elementais forem lançados.
+// Esta é a lista CURADA (nomes em PT, habilidades, exceções de variantes).
+// Sprites novos chegam sozinhos via data/elementals-auto.js (workflow
+// update-sprites.yml) e devem ser movidos para cá ao serem traduzidos.
 //
 // As imagens vêm da Fortnite Wiki via Special:FilePath (redireciona para o
 // arquivo atual da wiki). Os arquivos seguem o padrão
