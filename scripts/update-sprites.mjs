@@ -194,11 +194,14 @@ async function main() {
 
   const known = loadKnownElementals();
   const knownNames = new Set(known.map((e) => e.wikiName));
+  // Os "Em breve" (upcoming) podem ainda não aparecer na página da wiki —
+  // as travas de sanidade valem só para os Sprites já lançados.
+  const releasedNames = known.filter((e) => !e.upcoming).map((e) => e.wikiName);
 
-  // Fail-closed: todos os Sprites que o app já conhece precisam continuar
-  // citados na página. Se algum sumiu, ou a página foi reformulada, ou
-  // recebemos um HTML de desafio do WAF — não mexe em nada.
-  const missing = [...knownNames].filter((n) => !wikitext.includes(n));
+  // Fail-closed 1: todos os Sprites lançados precisam continuar citados na
+  // página. Se algum sumiu, ou a página foi reformulada, ou recebemos um
+  // HTML de desafio do WAF — não mexe em nada.
+  const missing = releasedNames.filter((n) => !wikitext.includes(n));
   if (missing.length > 0) {
     throw new Error(
       `Parse suspeito: a página não cita mais ${missing.join(", ")}. ` +
@@ -210,6 +213,21 @@ async function main() {
   console.log(`Sprites citados na página: ${parsed.size}`);
   for (const [name, rarity] of parsed) {
     console.log(`  - ${name} (${rarity || "raridade não encontrada"})`);
+  }
+
+  // Fail-closed 2: os padrões de extração precisam reencontrar os Sprites
+  // lançados. Se não reencontram nem os conhecidos, também não achariam os
+  // novos — o formato da página mudou e o parser precisa de ajuste.
+  // (Só vale para nomes com sufixo " Sprite": itens como "Burnt Peanut"
+  // não são extraíveis por padrão e ficam cobertos pela checagem 1.)
+  const notParsed = releasedNames.filter(
+    (n) => n.endsWith(" Sprite") && !parsed.has(n)
+  );
+  if (notParsed.length > 0) {
+    throw new Error(
+      `Parse suspeito: os padrões não reencontraram ${notParsed.join(", ")}. ` +
+        "O formato da página deve ter mudado; nada foi alterado."
+    );
   }
 
   const newNames = [...parsed.keys()].filter((n) => !knownNames.has(n));
