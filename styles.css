@@ -311,12 +311,14 @@ body {
   flex-wrap: wrap;
 }
 
-/* Botão de exportar o resumo da coleção como imagem. */
+/* Botão de exportar o resumo da coleção como imagem,
+   logo abaixo das barras de progresso. */
 .export-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-left: auto;
+  align-self: flex-start;
+  margin-top: 0.25rem;
   padding: 0.45rem 0.9rem;
   border-radius: 999px;
   border: 1px solid var(--border);

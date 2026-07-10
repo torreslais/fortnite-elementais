@@ -21,7 +21,6 @@ const TRANSLATIONS = {
     exportLabel: "Exportar resumo (PNG)",
     exportTitle: "Baixa uma imagem com o resumo da sua coleção",
     exportFile: "sprites-resumo",
-    exportLegend: "✓ tenho · ★ dominado",
     tabAll: "Todos",
     tabOwned: "Tenho",
     tabNotOwned: "Não tenho",
@@ -70,7 +69,6 @@ const TRANSLATIONS = {
     exportLabel: "Export summary (PNG)",
     exportTitle: "Downloads an image summarizing your collection",
     exportFile: "sprites-summary",
-    exportLegend: "✓ owned · ★ mastered",
     tabAll: "All",
     tabOwned: "Owned",
     tabNotOwned: "Not owned",
@@ -680,7 +678,7 @@ function exportSummary() {
   const list = ELEMENTALS.filter((e) => !e.upcoming);
 
   const W = 840;
-  const HEADER = 116;
+  const HEADER = 140;
   const ROW = 46;
   const FOOTER = 44;
   const H = HEADER + list.length * ROW + FOOTER;
@@ -715,15 +713,24 @@ function exportSummary() {
   ctx.textBaseline = "middle";
   ctx.fillText(s.title, 24, 34);
 
+  const date = new Date().toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US");
   ctx.font = `400 14px ${FONT}`;
   ctx.fillStyle = c.muted;
-  const date = new Date().toLocaleDateString(lang === "pt" ? "pt-BR" : "en-US");
+  ctx.fillText(date, 24, 60);
+
+  // Totais: tenho / não tenho e dominados / não dominados (de um total
+  // que conta o Base e cada variante de todos os Elementais lançados).
+  ctx.fillStyle = c.text;
   ctx.fillText(
-    `${date} — ${s.progressOwned(owned, total)} · ${s.progressMastered(mastered, total)}`,
+    `✓ ${s.tabOwned}: ${owned} / ${total} · ${s.tabNotOwned}: ${total - owned}`,
     24,
-    62
+    84
   );
-  ctx.fillText(s.exportLegend, 24, 84);
+  ctx.fillText(
+    `★ ${s.tabMastered}: ${mastered} / ${total} · ${s.tabNotMastered}: ${total - mastered}`,
+    24,
+    106
+  );
 
   ctx.strokeStyle = c.border;
   ctx.beginPath();
