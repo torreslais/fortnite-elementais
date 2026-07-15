@@ -451,7 +451,7 @@ function renderNav() {
 
 // Recolhido: uma linha rolável. Expandido: várias linhas com todos os ícones.
 const NAV_OPEN_KEY = "fortnite-elementals-nav-open";
-let navExpanded = storage.get(NAV_OPEN_KEY) === "1";
+let navExpanded = storage.get(NAV_OPEN_KEY) !== "0";
 
 function renderNavToggle() {
   const s = t();
