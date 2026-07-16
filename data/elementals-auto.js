@@ -8,7 +8,24 @@
 // variantes especiais etc.), MOVA a entrada para data/elementals.js: o
 // gerador pula Sprites que já estão na lista manual e a cópia daqui some na
 // próxima execução.
-const AUTO_ELEMENTALS = [];
+const AUTO_ELEMENTALS = [
+  {
+    "id": "batman",
+    "name": {
+      "pt": "Batman",
+      "en": "Batman"
+    },
+    "wikiName": "Batman Sprite",
+    "rarity": "Rare",
+    "autoAdded": "2026-07-16",
+    "ability": {
+      "pt": "Habilidade ainda não revelada.",
+      "en": "Ability not yet revealed."
+    },
+    "dust": 100,
+    "variantCost": 4000
+  }
+];
 
 // Anexa à lista principal os que ainda não existem lá, montando imagem e
 // variantes com os mesmos helpers de data/elementals.js.
