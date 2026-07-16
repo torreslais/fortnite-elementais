@@ -451,7 +451,7 @@ function renderNav() {
 
 // Recolhido: uma linha rolável. Expandido: várias linhas com todos os ícones.
 const NAV_OPEN_KEY = "fortnite-elementals-nav-open";
-let navExpanded = storage.get(NAV_OPEN_KEY) === "1";
+let navExpanded = storage.get(NAV_OPEN_KEY) !== "0";
 
 function renderNavToggle() {
   const s = t();
@@ -461,7 +461,19 @@ function renderNavToggle() {
   spriteNavToggle.title = label;
   spriteNavToggle.setAttribute("aria-label", label);
   spriteNavToggle.setAttribute("aria-expanded", navExpanded ? "true" : "false");
+  updateCardScrollOffset();
 }
+
+// A barra de navegação é sticky e muda de altura entre recolhida (uma
+// linha) e expandida (várias linhas). Guarda essa altura numa variável CSS
+// para os cards saberem quanto espaço reservar ao rolar até eles, em vez de
+// precisar recolher a barra antes de navegar.
+function updateCardScrollOffset() {
+  const navTop = parseFloat(getComputedStyle(spriteNav).top) || 0;
+  const offset = navTop + spriteNav.offsetHeight + 8;
+  document.documentElement.style.setProperty("--card-scroll-offset", `${offset}px`);
+}
+window.addEventListener("resize", updateCardScrollOffset);
 
 function setNavExpanded(value) {
   navExpanded = value;
@@ -489,10 +501,6 @@ spriteNav.addEventListener("click", (e) => {
     card = document.getElementById(`card-${id}`);
   }
   if (!card) return;
-
-  // Recolhe o menu antes de rolar, para o card não parar escondido
-  // atrás da barra expandida.
-  if (navExpanded) setNavExpanded(false);
 
   card.scrollIntoView({ behavior: "smooth", block: "start" });
   // Reinicia a animação de destaque mesmo em cliques repetidos.

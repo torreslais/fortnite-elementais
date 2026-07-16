@@ -492,8 +492,9 @@ body {
   border-top: 4px solid var(--rarity-color, var(--border));
   transition: transform 0.15s, box-shadow 0.15s;
   /* O scroll do menu de navegação para abaixo do cabeçalho fixo e da
-     própria barra de ícones grudada. */
-  scroll-margin-top: calc(7.6rem + env(safe-area-inset-top, 0px));
+     própria barra de ícones grudada. --card-scroll-offset é calculado em
+     JS a partir da altura real da barra (recolhida ou expandida). */
+  scroll-margin-top: var(--card-scroll-offset, calc(7.6rem + env(safe-area-inset-top, 0px)));
 }
 
 /* Destaque temporário no card alvo da navegação rápida. */
