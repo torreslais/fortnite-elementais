@@ -23,6 +23,40 @@ const AUTO_ELEMENTALS = [
       "en": "Ability not yet revealed."
     },
     "dust": 100,
+    "variantCost": 4000,
+    "image": "",
+    "variants": []
+  },
+  {
+    "id": "pollo",
+    "name": {
+      "pt": "Pollo",
+      "en": "Pollo"
+    },
+    "wikiName": "Pollo Sprite",
+    "rarity": "Rare",
+    "autoAdded": "2026-07-17",
+    "ability": {
+      "pt": "Habilidade ainda não revelada.",
+      "en": "Ability not yet revealed."
+    },
+    "dust": 100,
+    "variantCost": 4000
+  },
+  {
+    "id": "vini-jr",
+    "name": {
+      "pt": "Vini Jr.",
+      "en": "Vini Jr."
+    },
+    "wikiName": "Vini Jr. Sprite",
+    "rarity": "Rare",
+    "autoAdded": "2026-07-17",
+    "ability": {
+      "pt": "Habilidade ainda não revelada.",
+      "en": "Ability not yet revealed."
+    },
+    "dust": 100,
     "variantCost": 4000
   }
 ];
