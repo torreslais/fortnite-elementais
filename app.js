@@ -38,10 +38,6 @@ const TRANSLATIONS = {
     compareOnlyThem: "Só ele(a) tem",
     compareNone: "Nada exclusivo aqui",
     compareInvalidCode: "Este link de comparação é inválido ou está corrompido.",
-    compareLegendBoth: "Ambos",
-    compareLegendMine: "Só você",
-    compareLegendTheirs: "Só ele(a)",
-    compareLegendNeither: "Nenhum",
     tabAll: "Todos",
     tabOwned: "Tenho",
     tabNotOwned: "Não tenho",
@@ -107,10 +103,6 @@ const TRANSLATIONS = {
     compareOnlyThem: "Only they have",
     compareNone: "Nothing exclusive here",
     compareInvalidCode: "This comparison link is invalid or corrupted.",
-    compareLegendBoth: "Both",
-    compareLegendMine: "Only you",
-    compareLegendTheirs: "Only them",
-    compareLegendNeither: "Neither",
     tabAll: "All",
     tabOwned: "Owned",
     tabNotOwned: "Not owned",
@@ -771,21 +763,6 @@ function collectionTiles(elemental, entry, s) {
     </div>`;
 }
 
-// Uma linha compacta e somente-leitura por Elemental na tela de comparação:
-// nome + uma tira de badges (um por quadradinho) colorido pelo status.
-function renderCompareRow(row) {
-  const badges = row.tiles
-    .map((tile) => `<span class="compare-badge badge-${tile.status}">${tile.name}</span>`)
-    .join("");
-  return `
-    <div class="compare-row">
-      <span class="compare-row-name" style="--rarity-color:${RARITY_COLORS[row.elemental.rarity]}">
-        <span class="compare-row-dot"></span>${row.elemental.name[lang]}
-      </span>
-      <div class="compare-row-badges">${badges}</div>
-    </div>`;
-}
-
 function createCard(elemental) {
   const s = t();
   const entry = getEntry(elemental.id);
@@ -1135,7 +1112,6 @@ const compareOverlay = document.getElementById("compare-overlay");
 const compareStats = document.getElementById("compare-stats");
 const compareOnlyYou = document.getElementById("compare-only-you");
 const compareOnlyThem = document.getElementById("compare-only-them");
-const compareRows = document.getElementById("compare-rows");
 
 function openShareModal() {
   const s = t();
@@ -1157,13 +1133,13 @@ function parseSharePaste(text) {
   return match ? match[1] : trimmed;
 }
 
+// A comparação só olha para "tenho": "dominado" não entra na conta.
 function statTile(label, totals) {
   const s = t();
   return `
     <div class="compare-stat">
       <span class="compare-stat-label">${label}</span>
       <span class="compare-stat-value">${s.progressOwned(totals.owned, totals.total)}</span>
-      <span class="compare-stat-value">${s.progressMastered(totals.mastered, totals.total)}</span>
     </div>`;
 }
 
@@ -1197,7 +1173,6 @@ function openCompareModal(theirCollection) {
 
   compareOnlyYou.innerHTML = compareListColumn(s.compareOnlyYou, onlyMine);
   compareOnlyThem.innerHTML = compareListColumn(s.compareOnlyThem, onlyTheirs);
-  compareRows.innerHTML = rows.map(renderCompareRow).join("");
 
   closeShareModal();
   compareOverlay.hidden = false;

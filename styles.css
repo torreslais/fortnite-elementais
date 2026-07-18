@@ -12,13 +12,6 @@
   --epic: #b16fe0;
   --legendary: #f2a33d;
   --mythic: #ef5b7c;
-
-  /* Status da comparação de coleção (não são raridades, então não seguem
-     o padrão --rare/--epic/etc.). */
-  --diff-both: #4ade80;
-  --diff-mine: #7dd3fc;
-  --diff-theirs: #f2a33d;
-  --diff-neither: var(--border);
 }
 
 @media (prefers-color-scheme: light) {
@@ -470,8 +463,9 @@ body {
 }
 
 .compare-box {
-  height: min(88vh, 900px);
-  overflow: hidden;
+  height: auto;
+  max-height: min(88vh, 900px);
+  overflow-y: auto;
 }
 
 .compare-header {
@@ -543,76 +537,6 @@ body {
   margin: 0;
   font-size: 0.85rem;
   color: var(--muted);
-}
-
-.compare-rows {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border-top: 1px solid var(--border);
-  padding-top: 0.6rem;
-}
-
-.compare-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.compare-row-name {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.compare-row-dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 999px;
-  background: var(--rarity-color, var(--muted));
-  flex-shrink: 0;
-}
-
-.compare-row-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-}
-
-.compare-badge {
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  border: 1px solid var(--border);
-  color: var(--muted);
-}
-
-.compare-badge.badge-both {
-  background: color-mix(in srgb, var(--diff-both) 20%, var(--surface-hover));
-  border-color: var(--diff-both);
-  color: var(--diff-both);
-}
-
-.compare-badge.badge-mine {
-  background: color-mix(in srgb, var(--diff-mine) 20%, var(--surface-hover));
-  border-color: var(--diff-mine);
-  color: var(--diff-mine);
-}
-
-.compare-badge.badge-theirs {
-  background: color-mix(in srgb, var(--diff-theirs) 20%, var(--surface-hover));
-  border-color: var(--diff-theirs);
-  color: var(--diff-theirs);
-}
-
-.compare-badge.badge-neither {
-  opacity: 0.6;
 }
 
 .sort-label {
