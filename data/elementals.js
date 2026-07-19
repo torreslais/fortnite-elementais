@@ -24,7 +24,7 @@ const WIKI_ITEM = (fileBase) =>
 //    Zero Point (extraVariants).
 // Todas as variantes herdam a raridade do Sprite base — são versões
 // "especiais" com drop menor, não um tier de raridade próprio.
-// Linha do tempo: Goma habilitada em 11/jun, Galáxia em 18/jun; Gema e
+// Linha do tempo: Gelatinoso habilitado em 11/jun, Galáctico em 18/jun; Gema e
 // Metalizado chegaram nas Fendas Anômalas (Sprite Hunt Rift Anomalies) e
 // foram desabilitadas em 25/jun; o Metalizado voltou em 09/jul/2026 (a
 // Gema segue desabilitada no jogo, mas continua aqui para quem já tem).
@@ -39,7 +39,7 @@ const SPRITE_VARIANTS = [
   },
   {
     id: "gummy",
-    name: { pt: "Goma", en: "Gummy" },
+    name: { pt: "Gelatinoso", en: "Gummy" },
     effect: {
       pt: "+20% de Pó de Elemental ao extrair",
       en: "20% more Sprite Dust on extraction",
@@ -47,7 +47,7 @@ const SPRITE_VARIANTS = [
   },
   {
     id: "galaxy",
-    name: { pt: "Galáxia", en: "Galaxy" },
+    name: { pt: "Galáctico", en: "Galaxy" },
     effect: {
       pt: "+30% de munição ao saquear",
       en: "30% more ammo when looting",
