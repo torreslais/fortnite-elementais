@@ -113,6 +113,7 @@ const ELEMENTALS = [
     name: { pt: "Terra", en: "Earth" },
     wikiName: "Earth Sprite",
     rarity: "Rare",
+    extraVariants: ["cube"],
     ability: {
       pt: "Aumenta a chance de encontrar itens raros dentro de baús.",
       en: "Increases your chance of finding rare items in chests.",
@@ -125,6 +126,7 @@ const ELEMENTALS = [
     name: { pt: "Fogo", en: "Fire" },
     wikiName: "Fire Sprite",
     rarity: "Rare",
+    extraVariants: ["cube"],
     ability: {
       pt: "Cria uma explosão de dano extra depois de acertar o mesmo inimigo repetidas vezes.",
       en: "Creates a burst of extra damage after hitting the same enemy repeatedly.",
@@ -137,6 +139,7 @@ const ELEMENTALS = [
     name: { pt: "Peixoto", en: "Fishy" },
     wikiName: "Fishy Sprite",
     rarity: "Rare",
+    extraVariants: ["cube"],
     ability: {
       pt: "Aumenta bastante a velocidade de natação e dá um boost de velocidade ao levar dano.",
       en: "Greatly increases swim speed and grants a speed boost when you take damage.",
@@ -261,6 +264,7 @@ const ELEMENTALS = [
     name: { pt: "Chefe", en: "Boss" },
     wikiName: "Boss Sprite",
     rarity: "Legendary",
+    extraVariants: ["cube"],
     ability: {
       pt: "Aumenta o HP e o Shield máximos.",
       en: "Increases your maximum HP and Shield.",
@@ -311,6 +315,7 @@ const ELEMENTALS = [
     name: { pt: "Ceifador", en: "Grim" },
     wikiName: "Grim Sprite",
     rarity: "Mythic",
+    extraVariants: ["cube"],
     ability: {
       pt: "Marca no seu HUD, por um tempo, qualquer inimigo que te atacar.",
       en: "Marks any enemy who attacks you on your HUD for a duration.",
@@ -323,6 +328,7 @@ const ELEMENTALS = [
     name: { pt: "Batman", en: "Batman" },
     wikiName: "Batman Sprite",
     rarity: "Mythic",
+    extraVariants: ["cube"],
     ability: {
       pt: "Permite lançar-se no ar e abrir a Capa do Batman, funcionando como um planador extra durante a partida.",
       en: "Lets you launch into the air and deploy the Bat Cape, working as an extra glider during the match.",
